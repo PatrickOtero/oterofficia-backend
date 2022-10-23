@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev": "nodemon --exec ts-node ./src/server.ts"
+    "dev": "nodemon --exec ts-node ./src/server.ts",
     "start": "node ./src/server.ts",
   },
   "repository": {
