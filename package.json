@@ -11,6 +11,7 @@
     "url": "git+https://github.com/PatrickOtero/oterofficia-backend.git"
   },
   "keywords": [],
+  "type": "module",
   "author": "",
   "license": "ISC",
   "bugs": {
