@@ -1,0 +1,35 @@
+{
+  "name": "oterofficia-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --exec ts-node ./src/server.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PatrickOtero/oterofficia-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PatrickOtero/oterofficia-backend/issues"
+  },
+  "homepage": "https://github.com/PatrickOtero/oterofficia-backend#readme",
+  "dependencies": {
+    "@types/express": "^4.17.14",
+    "@types/node": "^18.11.3",
+    "@types/nodemailer": "^6.4.6",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "knex": "^2.3.0",
+    "nodemailer": "^6.8.0",
+    "nodemailer-express-handlebars": "^5.0.0",
+    "nodemon": "^2.0.20",
+    "pg": "^8.8.0",
+    "ts-node": "^10.9.1",
+    "uuidv4": "^6.2.13",
+    "yup": "^0.32.11"
+  }
+}
