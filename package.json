@@ -2,9 +2,9 @@
   "name": "oterofficia-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "server.ts",
   "scripts": {
     "dev": "nodemon --exec ts-node ./src/server.ts"
+    "start": "node ./src/server.ts",
   },
   "repository": {
     "type": "git",
