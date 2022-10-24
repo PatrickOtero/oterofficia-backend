@@ -3,8 +3,8 @@ const handlebars = require('nodemailer-express-handlebars')
 
 const transporter = nodemailer.createTransport({
   host: process.env.NODEMAILER_HOST,
-  port: 587,
-  secure: false, // true for 465, false for other ports
+  port: 465,
+  secure: true, // true for 465, false for other ports
   auth: {
     user: process.env.NODEMAILER_USER,
     pass: process.env.NODEMAILER_PASS,
