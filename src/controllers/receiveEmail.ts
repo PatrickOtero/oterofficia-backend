@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import nodemailer from "../services/nodemailer"
 
-const receiveEmail = (req: Request, res: Response) => {
+const receiveEmail = async (req: Request, res: Response) => {
     const { name, email, subject, emailContent } = req.body
 
     if (!name || !email || !subject || !emailContent) {
@@ -19,7 +19,7 @@ const receiveEmail = (req: Request, res: Response) => {
                 emailContent,
             },
         }
-        nodemailer.sendMail(sendData)
+        await nodemailer.sendMail(sendData)
 
         return res.status(200).json({ message: "E-mail enviado com sucesso"})
     } catch (error: any) {
