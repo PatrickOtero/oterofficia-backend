@@ -59,9 +59,9 @@ const editProject = async (req: Request, res: Response) => {
             return res.status(404).json({ message: "Nâo existe nenhum projeto com este id"})
         }
 
-        const isImageRepeated = await knex("projects").where("image_url", "=", image_url).first()
+        const isImageRepeated = await knex("projects").where("image_url", "=", image_url).whereNot("id", "=", projectId).first()
 
-        const isNameRepeated = await knex("projects").where("project_name", "=", project_name).first()
+        const isNameRepeated = await knex("projects").where("project_name", "=", project_name).whereNot("id", "=", projectId).first()
 
         if (isImageRepeated || isNameRepeated) {
             return res.status(400).json({ message: "Já existe um projeto com esta imagem e com este nome"})
