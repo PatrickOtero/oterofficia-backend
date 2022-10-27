@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { createProject, getProjects } from "./controllers/projectsControllers";
+import { createProject, deleteProject, editProject, getProjects } from "./controllers/projectsControllers";
 import { receiveEmail } from "./controllers/receiveEmail";
 import { createStudyPost } from "./controllers/studyPostControllers";
 
@@ -14,5 +14,7 @@ routes.post("/receiveEmail", receiveEmail)
 // Projetos
 routes.get("/projects", getProjects)
 routes.post("/projects", createProject)
+routes.put("/projects/:projectId", editProject)
+routes.delete("/projects/:projectId", deleteProject)
 
 export { routes }
