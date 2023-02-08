@@ -89,6 +89,8 @@ const deleteProject = async (req: Request, res: Response) => {
         
         await knex("projects").where("id", "=", projectId).delete()
 
+        return res.status(200).json({message: "Projeto excluído com sucesso."})
+
     } catch ( error: any ) {
         return res.status(400).json({ message: error.message})
     }
