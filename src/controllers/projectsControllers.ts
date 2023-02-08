@@ -17,9 +17,9 @@ const getProjects = async (req: Request, res: Response) => {
 }
 
 const createProject = async (req: Request, res: Response) => {
-    const { image_url, project_name, project_description, frontend_url, backend_url, video_url } = req.body
+    const { image_url, project_name, project_desc, frontend_url, backend_url, video_url } = req.body
 
-    if ( !image_url || !project_name || !project_description) {
+    if ( !image_url || !project_name || !project_desc) {
         return res.status(400).json({ message: "Por favor, um projeto precisa ter pelo menos uma imagem, um nome e uma descrição."})
     }
 
@@ -32,7 +32,7 @@ const createProject = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Já existe um projeto com esta imagem e com este nome"})
         }
 
-        await knex("projects").insert({ image_url, project_name, project_description, frontend_url, backend_url, video_url
+        await knex("projects").insert({ image_url, project_name, project_desc, frontend_url, backend_url, video_url
         })
 
         return res.status(201).json({ message: "O projeto foi criado com sucesso"})
@@ -44,11 +44,11 @@ const createProject = async (req: Request, res: Response) => {
 }
 
 const editProject = async (req: Request, res: Response) => {
-    const { image_url, project_name, project_description, frontend_url, backend_url, video_url } = req.body
+    const { image_url, project_name, project_desc, frontend_url, backend_url, video_url } = req.body
 
     const { projectId } = req.params;
 
-    if ( !image_url || !project_name || !project_description) {
+    if ( !image_url || !project_name || !project_desc) {
         return res.status(400).json({ message: "Por favor, um projeto precisa ter pelo menos uma imagem, um nome e uma descrição."})
     }
 
@@ -67,7 +67,7 @@ const editProject = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Já existe um projeto com esta imagem e com este nome"})
         }
 
-        await knex("projects").update({ image_url, project_name, project_description, frontend_url, backend_url, video_url
+        await knex("projects").update({ image_url, project_name, project_desc, frontend_url, backend_url, video_url
         }).where("id", "=", projectId)
 
         return res.status(200).json({ message: "As informações foram editadas com sucesso"})
