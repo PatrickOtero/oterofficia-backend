@@ -5,14 +5,29 @@ import { CommentService } from "./comment.service";
 
 export class CommentController {
   public create = async (req: Request, res: Response) => {
-    const { content } = parseCommentPayload(req.body);
-    const payload = await container.resolve(CommentService).createComment(req.params.studyId, content, req.user!);
+    const { content, parentCommentId } = parseCommentPayload(req.body);
+
+    const payload = await container
+      .resolve(CommentService)
+      .createComment(req.params.studyId, content, req.user!, parentCommentId);
 
     return res.status(201).json(payload);
   };
 
   public delete = async (req: Request, res: Response) => {
     const payload = await container.resolve(CommentService).deleteComment(req.params.commentId, req.user!);
+
+    return res.status(200).json(payload);
+  };
+
+  public like = async (req: Request, res: Response) => {
+    const payload = await container.resolve(CommentService).likeComment(req.params.commentId, req.user!);
+
+    return res.status(200).json(payload);
+  };
+
+  public unlike = async (req: Request, res: Response) => {
+    const payload = await container.resolve(CommentService).unlikeComment(req.params.commentId, req.user!);
 
     return res.status(200).json(payload);
   };

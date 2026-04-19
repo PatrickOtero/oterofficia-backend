@@ -1,4 +1,4 @@
-export const UPLOAD_FOLDERS = ["projects", "study-content", "study-covers"] as const;
+export const UPLOAD_FOLDERS = ["avatars", "projects", "study-content", "study-covers"] as const;
 
 export type UploadFolder = (typeof UPLOAD_FOLDERS)[number];
 

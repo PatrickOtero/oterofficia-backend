@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.qodo
+coverage
+docs/api
+npm-debug.log
+yarn-error.log
+storage

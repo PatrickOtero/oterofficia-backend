@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: oterofficia-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: oterofficia
+      POSTGRES_PASSWORD: oterofficia
+      POSTGRES_USER: oterofficia
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: oterofficia-api
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://oterofficia:oterofficia@postgres:5432/oterofficia
+      PORT: 3002
+      PUBLIC_API_URL: http://localhost:3002
+      RUN_MIGRATIONS: "true"
+    ports:
+      - "3002:3002"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

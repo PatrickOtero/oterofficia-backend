@@ -1,0 +1,490 @@
+{
+  "info": {
+    "_postman_id": "77dbdff4-f4cb-4d73-a356-f0f943f04438",
+    "name": "Oterofficia API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colecao completa da API do Oterofficia para uso no Postman."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3002" },
+    { "key": "bearerToken", "value": "" },
+    { "key": "studyId", "value": "" },
+    { "key": "studySlug", "value": "" },
+    { "key": "commentId", "value": "" },
+    { "key": "projectId", "value": "1" },
+    { "key": "uploadKey", "value": "projects/demo.png" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Patrick Otero\",\n  \"email\": \"patrick@oterofficia.com\",\n  \"password\": \"12345678\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patrick@oterofficia.com\",\n  \"password\": \"12345678\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Resend Verification",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patrick@oterofficia.com\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/resend-verification"
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"cole-o-token-aqui\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/verify-email"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patrick@oterofficia.com\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/forgot-password"
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"cole-o-token-aqui\",\n  \"password\": \"novaSenha123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/reset-password"
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Patrick Otero\",\n  \"birthDate\": \"1998-12-03\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/profile"
+          }
+        },
+        {
+          "name": "Upload Avatar",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": "{{baseUrl}}/auth/profile/avatar"
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"12345678\",\n  \"newPassword\": \"novaSenha123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/profile/password"
+          }
+        },
+        {
+          "name": "Request Email Change",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nextEmail\": \"novo-email@oterofficia.com\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/profile/email-change"
+          }
+        },
+        {
+          "name": "Confirm Email Change",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"cole-o-token-aqui\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/confirm-email-change"
+          }
+        },
+        {
+          "name": "Request Account Deletion",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"12345678\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/profile/account-deletion"
+          }
+        },
+        {
+          "name": "Confirm Account Deletion",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"cole-o-token-aqui\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/confirm-account-deletion"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Studies Public",
+      "item": [
+        {
+          "name": "List Studies",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/studies"
+          }
+        },
+        {
+          "name": "Get Study By Slug",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/studies/{{studySlug}}"
+          }
+        },
+        {
+          "name": "List Comments",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/studies/{{studyId}}/comments"
+          }
+        },
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Excelente leitura.\"\n}"
+            },
+            "url": "{{baseUrl}}/studies/{{studyId}}/comments"
+          }
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/comments/{{commentId}}"
+          }
+        },
+        {
+          "name": "Like Study",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/studies/{{studyId}}/likes"
+          }
+        },
+        {
+          "name": "Unlike Study",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/studies/{{studyId}}/likes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Studies",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/admin/studies/dashboard"
+          }
+        },
+        {
+          "name": "List Admin Studies",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/admin/studies"
+          }
+        },
+        {
+          "name": "Get Admin Study",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/admin/studies/{{studyId}}"
+          }
+        },
+        {
+          "name": "Create Study",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Novo estudo\",\n  \"excerpt\": \"Resumo do estudo.\",\n  \"coverImage\": null,\n  \"status\": \"draft\",\n  \"category\": \"Engenharia de software\",\n  \"tags\": [\"arquitetura\"],\n  \"seoTitle\": null,\n  \"seoDescription\": null,\n  \"content\": [\n    {\n      \"type\": \"paragraph\",\n      \"data\": {\n        \"text\": \"Conteudo inicial.\"\n      }\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/admin/studies"
+          }
+        },
+        {
+          "name": "Update Study",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Estudo atualizado\",\n  \"excerpt\": \"Resumo atualizado.\",\n  \"coverImage\": null,\n  \"status\": \"published\",\n  \"category\": \"Engenharia de software\",\n  \"tags\": [\"arquitetura\", \"sistemas\"],\n  \"seoTitle\": \"Titulo SEO\",\n  \"seoDescription\": \"Descricao SEO\",\n  \"content\": [\n    {\n      \"type\": \"paragraph\",\n      \"data\": {\n        \"text\": \"Conteudo atualizado.\"\n      }\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/admin/studies/{{studyId}}"
+          }
+        },
+        {
+          "name": "Set Study Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"published\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/studies/{{studyId}}/status"
+          }
+        },
+        {
+          "name": "Delete Study",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/admin/studies/{{studyId}}"
+          }
+        },
+        {
+          "name": "List Admin Comments",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/admin/studies/comments"
+          }
+        },
+        {
+          "name": "Delete Admin Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/admin/studies/comments/{{commentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/projects"
+          }
+        },
+        {
+          "name": "Get Project",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/projects/{{projectId}}"
+          }
+        },
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_name\": \"Pairing Forge\",\n  \"project_desc\": \"Descricao do projeto.\",\n  \"image_url\": \"https://example.com/project.png\",\n  \"frontend_url\": \"https://app.example.com\",\n  \"backend_url\": \"https://api.example.com\",\n  \"video_url\": null\n}"
+            },
+            "url": "{{baseUrl}}/projects"
+          }
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_name\": \"Pairing Forge\",\n  \"project_desc\": \"Descricao atualizada.\",\n  \"image_url\": \"https://example.com/project.png\",\n  \"frontend_url\": \"https://app.example.com\",\n  \"backend_url\": \"https://api.example.com\",\n  \"video_url\": \"https://youtu.be/demo\"\n}"
+            },
+            "url": "{{baseUrl}}/projects/{{projectId}}"
+          }
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "url": "{{baseUrl}}/projects/{{projectId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uploads",
+      "item": [
+        {
+          "name": "Get Public Upload",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/uploads/projects/demo.png"
+          }
+        },
+        {
+          "name": "Admin Upload",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "folder", "value": "projects", "type": "text" },
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/uploads"
+          }
+        },
+        {
+          "name": "Admin Delete Upload",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"{{uploadKey}}\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/uploads"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contact",
+      "item": [
+        {
+          "name": "Send Contact Message",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Patrick\",\n  \"email\": \"patrick@email.com\",\n  \"subject\": \"Nova oportunidade\",\n  \"emailContent\": \"Mensagem enviada pelo formulario do site.\"\n}"
+            },
+            "url": "{{baseUrl}}/receiveEmail"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -5,24 +5,41 @@ import { AuthService } from "../../../src/modules/auth/auth.service";
 describe("AuthService", () => {
   let authRepository: AuthRepositoryInMemory;
   let authService: AuthService;
+  let mailerMock: { sendMail: jest.Mock };
+  let uploadServiceMock: { deleteFile: jest.Mock; uploadFile: jest.Mock };
 
   beforeEach(() => {
     authRepository = new AuthRepositoryInMemory();
-    authService = new AuthService(authRepository);
+    mailerMock = {
+      sendMail: jest.fn().mockResolvedValue(undefined),
+    };
+    uploadServiceMock = {
+      deleteFile: jest.fn().mockResolvedValue(undefined),
+      uploadFile: jest.fn().mockResolvedValue({
+        fallbackUsed: false,
+        fileName: "avatar.png",
+        folder: "avatars",
+        key: "avatars/avatar.png",
+        mimeType: "image/png",
+        size: 10,
+        source: "cloudflare",
+      }),
+    };
+    authService = new AuthService(authRepository, mailerMock as any, uploadServiceMock as any);
     process.env.ADMIN_EMAIL = "admin@oterofficia.com";
   });
 
-  it("registers a user and returns an authentication payload", async () => {
+  it("registers a user and requests email verification", async () => {
     const response = await authService.register({
       email: "patrick@oterofficia.com",
       name: "Patrick",
       password: "super-secret",
     });
 
-    expect(response.user.email).toBe("patrick@oterofficia.com");
-    expect(response.token).toEqual(expect.any(String));
+    expect(response.requiresEmailVerification).toBe(true);
     expect(authRepository.users).toHaveLength(1);
-    expect(authRepository.sessions).toHaveLength(1);
+    expect(authRepository.tokens).toHaveLength(1);
+    expect(mailerMock.sendMail).toHaveBeenCalledTimes(1);
   });
 
   it("rejects duplicate emails on register", async () => {
@@ -44,11 +61,17 @@ describe("AuthService", () => {
     });
   });
 
-  it("authenticates an existing user", async () => {
+  it("authenticates an existing verified user", async () => {
     await authService.register({
       email: "patrick@oterofficia.com",
       name: "Patrick",
       password: "super-secret",
+    });
+
+    const createdUser = authRepository.users[0];
+    await authRepository.updateUser({
+      emailVerifiedAt: new Date(),
+      id: createdUser.id,
     });
 
     const response = await authService.login({
@@ -58,5 +81,23 @@ describe("AuthService", () => {
 
     expect(response.user.name).toBe("Patrick");
     expect(response.token).toEqual(expect.any(String));
+  });
+
+  it("prevents login before email verification", async () => {
+    await authService.register({
+      email: "patrick@oterofficia.com",
+      name: "Patrick",
+      password: "super-secret",
+    });
+
+    await expect(
+      authService.login({
+        email: "patrick@oterofficia.com",
+        password: "super-secret",
+      })
+    ).rejects.toMatchObject<AppError>({
+      code: "email_not_verified",
+      statusCode: 403,
+    });
   });
 });

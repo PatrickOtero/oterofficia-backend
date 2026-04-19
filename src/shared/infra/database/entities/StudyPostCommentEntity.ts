@@ -3,8 +3,10 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
 } from "typeorm";
+import { StudyCommentLikeEntity } from "./StudyCommentLikeEntity";
 import { StudyPostEntity } from "./StudyPostEntity";
 import { UserEntity } from "./UserEntity";
 
@@ -29,6 +31,19 @@ export class StudyPostCommentEntity {
   @ManyToOne(() => StudyPostEntity, (post) => post.comments, { onDelete: "CASCADE" })
   @JoinColumn({ name: "post_id" })
   post!: StudyPostEntity;
+
+  @Column("varchar", { name: "parent_comment_id", length: 36, nullable: true })
+  parentCommentId!: string | null;
+
+  @ManyToOne(() => StudyPostCommentEntity, (comment) => comment.replies, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "parent_comment_id" })
+  parentComment!: StudyPostCommentEntity | null;
+
+  @OneToMany(() => StudyPostCommentEntity, (comment) => comment.parentComment)
+  replies?: StudyPostCommentEntity[];
+
+  @OneToMany(() => StudyCommentLikeEntity, (commentLike) => commentLike.comment)
+  likes?: StudyCommentLikeEntity[];
 
   @Column("timestamptz", { name: "created_at", default: () => "CURRENT_TIMESTAMP" })
   createdAt!: Date;

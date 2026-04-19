@@ -11,6 +11,9 @@ const commentController = new CommentController();
 
 commentsRouter.get("/studies/:studyId/comments", optionalAuth, asyncHandler(commentController.listByPost));
 commentsRouter.post("/studies/:studyId/comments", requireAuth, asyncHandler(commentController.create));
+commentsRouter.post("/comments/:commentId/like", requireAuth, asyncHandler(commentController.like));
+commentsRouter.post("/comments/:commentId/likes", requireAuth, asyncHandler(commentController.like));
+commentsRouter.delete("/comments/:commentId/likes", requireAuth, asyncHandler(commentController.unlike));
 commentsRouter.delete("/comments/:commentId", requireAuth, asyncHandler(commentController.delete));
 
 adminCommentsRouter.use(requireAuth, requireAdmin);

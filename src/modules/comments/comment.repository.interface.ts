@@ -4,22 +4,14 @@ export type CreateCommentInput = {
   content: string;
   postId: string;
   userId: string;
-};
-
-export type CreatedCommentRecord = {
-  author_id: string;
-  author_name: string;
-  content: string;
-  created_at: Date | string;
-  id: string;
-  post_id: string;
-  updated_at: Date | string;
+  parentCommentId?: string | null;
 };
 
 export type CommentPermissionRecord = {
   id: string;
   post_id: string;
   user_id: string;
+  parent_comment_id: string | null;
 };
 
 export type AdminComment = StudyComment & {
@@ -27,10 +19,13 @@ export type AdminComment = StudyComment & {
 };
 
 export interface ICommentRepository {
-  createComment(input: CreateCommentInput): Promise<CreatedCommentRecord | null>;
+  createComment(input: CreateCommentInput, viewerUserId?: string, viewerRole?: "admin" | "user"): Promise<StudyComment | null>;
+  createLike(commentId: string, userId: string): Promise<void>;
   deleteComment(commentId: string): Promise<void>;
-  findCommentById(commentId: string): Promise<CreatedCommentRecord | null>;
+  deleteLike(commentId: string, userId: string): Promise<void>;
+  findCommentById(commentId: string, viewerUserId?: string, viewerRole?: "admin" | "user"): Promise<StudyComment | null>;
   findCommentPermissionData(commentId: string): Promise<CommentPermissionRecord | null>;
+  findLike(commentId: string, userId: string): Promise<boolean>;
   listAdminComments(filters: AdminCommentFilters): Promise<AdminComment[]>;
   listCommentsByPostId(postId: string, viewerUserId?: string, viewerRole?: "admin" | "user"): Promise<StudyComment[]>;
 }

@@ -22,7 +22,7 @@ export class ContactService {
         emailContent: input.emailContent,
         name: input.name,
       },
-      from: `"${input.name}" <${process.env.NODEMAILER_USER}>`,
+      from: process.env.NODEMAILER_FROM || process.env.NODEMAILER_USER || "no-reply@oterofficia.local",
       replyTo: input.email,
       subject: input.subject,
       template: "receivingEmail",

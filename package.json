@@ -7,14 +7,20 @@
     "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules src/server.ts",
     "build": "tsc --project tsconfig.json",
     "start": "node dist/src/server.js",
+    "docs:export": "npm run build && node scripts/export-openapi.js",
+    "mail:verify": "node scripts/verify-mailer.js",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "migration:generate": "typeorm-ts-node-commonjs -d src/shared/infra/database/data-source.ts migration:generate src/shared/infra/database/migrations/AutoMigration",
     "migration:run": "typeorm-ts-node-commonjs -d src/shared/infra/database/data-source.ts migration:run",
     "migration:revert": "typeorm-ts-node-commonjs -d src/shared/infra/database/data-source.ts migration:revert",
+    "migration:show": "typeorm-ts-node-commonjs -d src/shared/infra/database/data-source.ts migration:show",
     "migrate:latest": "npm run migration:run",
-    "migrate:rollback": "npm run migration:revert"
+    "migrate:rollback": "npm run migration:revert",
+    "db:migrate": "npm run migration:run",
+    "db:revert": "npm run migration:revert",
+    "db:status": "npm run migration:show"
   },
   "repository": {
     "type": "git",
@@ -29,6 +35,7 @@
     "@types/multer": "^2.1.0",
     "@types/node": "^18.11.3",
     "@types/nodemailer": "^6.4.6",
+    "@types/swagger-ui-express": "^4.1.8",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
@@ -37,6 +44,7 @@
     "nodemailer-express-handlebars": "^5.0.0",
     "pg": "^8.13.0",
     "reflect-metadata": "^0.2.2",
+    "swagger-ui-express": "^5.0.1",
     "ts-node": "^10.9.2",
     "tsyringe": "^4.10.0",
     "typeorm": "^0.3.28"

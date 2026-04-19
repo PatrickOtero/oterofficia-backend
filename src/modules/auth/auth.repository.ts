@@ -1,28 +1,56 @@
+import { injectable } from "tsyringe";
 import { getDataSource } from "../../shared/infra/database/data-source";
+import { UserActionTokenEntity } from "../../shared/infra/database/entities/UserActionTokenEntity";
 import { UserSessionEntity } from "../../shared/infra/database/entities/UserSessionEntity";
 import { UserEntity } from "../../shared/infra/database/entities/UserEntity";
-import { injectable } from "tsyringe";
-import { CreateSessionInput, CreateUserInput, IAuthRepository, UpdateUserInput } from "./auth.repository.interface";
-import { AuthenticatedSessionUser, SessionRecord, UserRecord } from "./auth.types";
+import {
+  CreateSessionInput,
+  CreateUserActionTokenInput,
+  CreateUserInput,
+  IAuthRepository,
+  UpdateUserInput,
+} from "./auth.repository.interface";
+import {
+  AuthenticatedSessionUser,
+  SessionRecord,
+  UserActionTokenRecord,
+  UserProfile,
+  UserRecord,
+} from "./auth.types";
 
-const toIso = (value: Date) => value.toISOString();
+const toIso = (value?: Date | null) => (value ? value.toISOString() : null);
 
 const mapUserEntity = (user: UserEntity): UserRecord => ({
-  createdAt: toIso(user.createdAt),
+  avatarUrl: user.avatarUrl ?? null,
+  birthDate: user.birthDate ?? null,
+  createdAt: user.createdAt.toISOString(),
   email: user.email,
+  emailVerifiedAt: toIso(user.emailVerifiedAt),
   id: user.id,
   name: user.name,
   passwordHash: user.passwordHash,
   role: user.role,
-  updatedAt: toIso(user.updatedAt),
+  updatedAt: user.updatedAt.toISOString(),
+});
+
+const mapUserProfile = (user: UserEntity): UserProfile => ({
+  avatarUrl: user.avatarUrl ?? null,
+  birthDate: user.birthDate ?? null,
+  createdAt: user.createdAt.toISOString(),
+  email: user.email,
+  emailVerifiedAt: toIso(user.emailVerifiedAt),
+  id: user.id,
+  name: user.name,
+  role: user.role,
+  updatedAt: user.updatedAt.toISOString(),
 });
 
 const mapSessionEntity = (
   session: UserSessionEntity
 ): { session: SessionRecord; user: AuthenticatedSessionUser } => ({
   session: {
-    createdAt: toIso(session.createdAt),
-    expiresAt: toIso(session.expiresAt),
+    createdAt: session.createdAt.toISOString(),
+    expiresAt: session.expiresAt.toISOString(),
     id: session.id,
     tokenHash: session.tokenHash,
     userId: session.userId,
@@ -35,8 +63,38 @@ const mapSessionEntity = (
   },
 });
 
+const mapActionTokenEntity = (token: UserActionTokenEntity): UserActionTokenRecord => ({
+  consumedAt: toIso(token.consumedAt),
+  createdAt: token.createdAt.toISOString(),
+  expiresAt: token.expiresAt.toISOString(),
+  id: token.id,
+  payload: token.payload ?? null,
+  tokenHash: token.tokenHash,
+  type: token.type as UserActionTokenRecord["type"],
+  userId: token.userId,
+});
+
 @injectable()
 export class AuthRepository implements IAuthRepository {
+  public async createActionToken(input: CreateUserActionTokenInput) {
+    const dataSource = await getDataSource();
+    const repository = dataSource.getRepository(UserActionTokenEntity);
+
+    const token = repository.create({
+      consumedAt: null,
+      createdAt: new Date(),
+      expiresAt: input.expiresAt,
+      id: input.id,
+      payload: input.payload ?? null,
+      tokenHash: input.tokenHash,
+      type: input.type,
+      userId: input.userId,
+    });
+
+    const savedToken = await repository.save(token);
+    return mapActionTokenEntity(savedToken);
+  }
+
   public async createSession(input: CreateSessionInput) {
     const dataSource = await getDataSource();
 
@@ -54,8 +112,11 @@ export class AuthRepository implements IAuthRepository {
     const userRepository = dataSource.getRepository(UserEntity);
 
     await userRepository.save({
+      avatarUrl: input.avatarUrl ?? null,
+      birthDate: input.birthDate ? input.birthDate.toISOString().slice(0, 10) : null,
       createdAt: new Date(),
       email: input.email,
+      emailVerifiedAt: input.emailVerifiedAt ?? null,
       id: input.id,
       name: input.name,
       passwordHash: input.passwordHash,
@@ -66,10 +127,40 @@ export class AuthRepository implements IAuthRepository {
     return this.findUserById(input.id);
   }
 
-  public async deleteSessionByTokenHash(tokenHash: string) {
+  public async deleteActiveTokensByUserAndType(userId: string, type: UserActionTokenRecord["type"]) {
     const dataSource = await getDataSource();
 
+    await dataSource
+      .getRepository(UserActionTokenEntity)
+      .createQueryBuilder()
+      .delete()
+      .from(UserActionTokenEntity)
+      .where("user_id = :userId", { userId })
+      .andWhere("type = :type", { type })
+      .andWhere("consumed_at IS NULL")
+      .execute();
+  }
+
+  public async deleteSessionByTokenHash(tokenHash: string) {
+    const dataSource = await getDataSource();
     await dataSource.getRepository(UserSessionEntity).delete({ tokenHash });
+  }
+
+  public async deleteUser(userId: string) {
+    const dataSource = await getDataSource();
+    await dataSource.getRepository(UserEntity).delete({ id: userId });
+  }
+
+  public async findActionTokenByHash(type: UserActionTokenRecord["type"], tokenHash: string) {
+    const dataSource = await getDataSource();
+    const token = await dataSource.getRepository(UserActionTokenEntity).findOne({
+      where: {
+        tokenHash,
+        type,
+      },
+    });
+
+    return token ? mapActionTokenEntity(token) : null;
   }
 
   public async findSessionByTokenHash(tokenHash: string) {
@@ -108,31 +199,66 @@ export class AuthRepository implements IAuthRepository {
     return user ? mapUserEntity(user) : null;
   }
 
-  public async updateUser(input: UpdateUserInput) {
+  public async getUserProfileById(userId: string) {
     const dataSource = await getDataSource();
+    const user = await dataSource.getRepository(UserEntity).findOne({
+      where: {
+        id: userId,
+      },
+    });
 
-    await dataSource.getRepository(UserEntity).update(
-      { id: input.id },
+    return user ? mapUserProfile(user) : null;
+  }
+
+  public async markActionTokenConsumed(tokenId: string) {
+    const dataSource = await getDataSource();
+    await dataSource.getRepository(UserActionTokenEntity).update(
+      { id: tokenId },
       {
-        name: input.name,
-        passwordHash: input.passwordHash,
-        role: input.role,
-        updatedAt: new Date(),
+        consumedAt: new Date(),
       }
     );
   }
 
-  public async updateUserRole(userId: string, role: "admin" | "user") {
-    const existingUser = await this.findUserById(userId);
+  public async updateUser(input: UpdateUserInput) {
+    const dataSource = await getDataSource();
+    const repository = dataSource.getRepository(UserEntity);
+    const existingUser = await repository.findOne({
+      where: {
+        id: input.id,
+      },
+    });
 
     if (!existingUser) {
-      return;
+      return null;
     }
 
+    await repository.update(
+      { id: input.id },
+      {
+        avatarUrl: input.avatarUrl !== undefined ? input.avatarUrl : existingUser.avatarUrl,
+        birthDate:
+          input.birthDate !== undefined
+            ? input.birthDate
+              ? input.birthDate.toISOString().slice(0, 10)
+              : null
+            : existingUser.birthDate,
+        email: input.email ?? existingUser.email,
+        emailVerifiedAt:
+          input.emailVerifiedAt !== undefined ? input.emailVerifiedAt : existingUser.emailVerifiedAt,
+        name: input.name ?? existingUser.name,
+        passwordHash: input.passwordHash ?? existingUser.passwordHash,
+        role: input.role ?? existingUser.role,
+        updatedAt: new Date(),
+      }
+    );
+
+    return this.findUserById(input.id);
+  }
+
+  public async updateUserRole(userId: UserRecord["id"], role: UserRecord["role"]) {
     await this.updateUser({
       id: userId,
-      name: existingUser.name,
-      passwordHash: existingUser.passwordHash,
       role,
     });
   }

@@ -8,6 +8,7 @@ export const parseCommentPayload = (payload: unknown) => {
       max: 2000,
       preserveWhitespace: true,
     }),
+    parentCommentId: readOptionalString(body.parentCommentId, "O comentário pai", { max: 36 }) ?? null,
   };
 };
 

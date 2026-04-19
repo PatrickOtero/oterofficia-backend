@@ -1,24 +1,23 @@
 import { randomUUID } from "crypto";
-import { getDataSource } from "../../shared/infra/database/data-source";
-import { StudyPostCommentEntity } from "../../shared/infra/database/entities/StudyPostCommentEntity";
 import { injectable } from "tsyringe";
-import { AdminComment, CreateCommentInput, ICommentRepository } from "./comment.repository.interface";
+import { getDataSource } from "../../shared/infra/database/data-source";
+import { StudyCommentLikeEntity } from "../../shared/infra/database/entities/StudyCommentLikeEntity";
+import { StudyPostCommentEntity } from "../../shared/infra/database/entities/StudyPostCommentEntity";
+import { AdminComment, CommentPermissionRecord, CreateCommentInput, ICommentRepository } from "./comment.repository.interface";
 import { AdminCommentFilters, StudyComment } from "./comment.types";
 
 type CommentRow = {
+  author_avatar_url: string | null;
   author_id: string;
   author_name: string;
   content: string;
   created_at: Date | string;
   id: string;
+  liked_by_current_user: boolean;
+  likes_count: number | string;
+  parent_comment_id: string | null;
   post_id: string;
   updated_at: Date | string;
-};
-
-type CommentPermissionRow = {
-  id: string;
-  post_id: string;
-  user_id: string;
 };
 
 type AdminCommentRow = CommentRow & {
@@ -27,8 +26,13 @@ type AdminCommentRow = CommentRow & {
 
 const toIso = (value: Date | string) => new Date(value).toISOString();
 
-const mapComment = (row: CommentRow, viewerUserId?: string, viewerRole?: "admin" | "user"): StudyComment => ({
+const mapCommentRow = (
+  row: CommentRow,
+  viewerUserId?: string,
+  viewerRole?: "admin" | "user"
+): StudyComment => ({
   author: {
+    avatarUrl: row.author_avatar_url,
     id: row.author_id,
     name: row.author_name,
   },
@@ -36,13 +40,73 @@ const mapComment = (row: CommentRow, viewerUserId?: string, viewerRole?: "admin"
   content: row.content,
   createdAt: toIso(row.created_at),
   id: row.id,
+  likedByCurrentUser: Boolean(row.liked_by_current_user),
+  likesCount: Number(row.likes_count || 0),
+  parentCommentId: row.parent_comment_id,
   postId: row.post_id,
+  replies: [],
   updatedAt: toIso(row.updated_at),
 });
 
+const buildCommentTree = (rows: CommentRow[], viewerUserId?: string, viewerRole?: "admin" | "user") => {
+  const byId = new Map<string, StudyComment>();
+  const roots: StudyComment[] = [];
+
+  rows.forEach((row) => {
+    byId.set(row.id, mapCommentRow(row, viewerUserId, viewerRole));
+  });
+
+  rows.forEach((row) => {
+    const comment = byId.get(row.id);
+
+    if (!comment) {
+      return;
+    }
+
+    if (row.parent_comment_id && byId.has(row.parent_comment_id)) {
+      byId.get(row.parent_comment_id)!.replies.push(comment);
+      return;
+    }
+
+    roots.push(comment);
+  });
+
+  return roots;
+};
+
+const buildCommentQuery = (whereClause: string) => `
+  select
+    comments.id,
+    comments.post_id,
+    comments.parent_comment_id,
+    comments.content,
+    comments.created_at,
+    comments.updated_at,
+    users.id as author_id,
+    users.name as author_name,
+    users.avatar_url as author_avatar_url,
+    coalesce(count(comment_likes.id), 0)::int as likes_count,
+    coalesce(max(case when comment_likes.user_id = $2 then 1 else 0 end), 0)::int = 1 as liked_by_current_user
+  from study_post_comments comments
+  inner join users on users.id = comments.user_id
+  left join study_comment_likes comment_likes on comment_likes.comment_id = comments.id
+  ${whereClause}
+  group by
+    comments.id,
+    comments.post_id,
+    comments.parent_comment_id,
+    comments.content,
+    comments.created_at,
+    comments.updated_at,
+    users.id,
+    users.name,
+    users.avatar_url
+  order by comments.created_at asc
+`;
+
 @injectable()
 export class CommentRepository implements ICommentRepository {
-  public async createComment(input: CreateCommentInput) {
+  public async createComment(input: CreateCommentInput, viewerUserId?: string, viewerRole?: "admin" | "user") {
     const dataSource = await getDataSource();
     const id = randomUUID();
     const now = new Date();
@@ -51,49 +115,48 @@ export class CommentRepository implements ICommentRepository {
       content: input.content,
       createdAt: now,
       id,
+      parentCommentId: input.parentCommentId ?? null,
       postId: input.postId,
       updatedAt: now,
       userId: input.userId,
     });
 
-    return this.findCommentById(id);
+    return this.findCommentById(id, viewerUserId, viewerRole);
+  }
+
+  public async createLike(commentId: string, userId: string) {
+    const dataSource = await getDataSource();
+
+    await dataSource.getRepository(StudyCommentLikeEntity).save({
+      commentId,
+      createdAt: new Date(),
+      id: randomUUID(),
+      userId,
+    });
   }
 
   public async deleteComment(commentId: string) {
     const dataSource = await getDataSource();
-
     await dataSource.getRepository(StudyPostCommentEntity).delete({ id: commentId });
   }
 
-  public async findCommentById(commentId: string) {
+  public async deleteLike(commentId: string, userId: string) {
     const dataSource = await getDataSource();
-    const rows = await dataSource.query(
-      `
-      select
-        comments.content,
-        comments.created_at,
-        comments.id,
-        comments.post_id,
-        comments.updated_at,
-        users.id as author_id,
-        users.name as author_name
-      from study_post_comments comments
-      inner join users on users.id = comments.user_id
-      where comments.id = $1
-      limit 1
-      `,
-      [commentId]
-    );
+    await dataSource.getRepository(StudyCommentLikeEntity).delete({ commentId, userId });
+  }
 
-    return (rows[0] as CommentRow | undefined) ?? null;
+  public async findCommentById(commentId: string, viewerUserId?: string, viewerRole?: "admin" | "user") {
+    const dataSource = await getDataSource();
+    const rows = await dataSource.query(buildCommentQuery("where comments.id = $1"), [commentId, viewerUserId ?? ""]);
+
+    const row = rows[0] as CommentRow | undefined;
+    return row ? mapCommentRow(row, viewerUserId, viewerRole) : null;
   }
 
   public async findCommentPermissionData(commentId: string) {
     const dataSource = await getDataSource();
     const comment = await dataSource.getRepository(StudyPostCommentEntity).findOne({
-      where: {
-        id: commentId,
-      },
+      where: { id: commentId },
     });
 
     if (!comment) {
@@ -102,9 +165,20 @@ export class CommentRepository implements ICommentRepository {
 
     return {
       id: comment.id,
+      parent_comment_id: comment.parentCommentId,
       post_id: comment.postId,
       user_id: comment.userId,
-    } as CommentPermissionRow;
+    } as CommentPermissionRecord;
+  }
+
+  public async findLike(commentId: string, userId: string) {
+    const dataSource = await getDataSource();
+    return dataSource.getRepository(StudyCommentLikeEntity).exist({
+      where: {
+        commentId,
+        userId,
+      },
+    });
   }
 
   public async listAdminComments(filters: AdminCommentFilters) {
@@ -125,53 +199,55 @@ export class CommentRepository implements ICommentRepository {
       );
     }
 
+    params.push("");
+    const viewerParam = `$${params.length}`;
     const whereClause = conditions.length ? `where ${conditions.join(" and ")}` : "";
     const rows = await dataSource.query(
       `
       select
-        comments.content,
-        comments.created_at,
         comments.id,
         comments.post_id,
+        comments.parent_comment_id,
+        comments.content,
+        comments.created_at,
         comments.updated_at,
         users.id as author_id,
         users.name as author_name,
-        posts.title as post_title
+        users.avatar_url as author_avatar_url,
+        posts.title as post_title,
+        coalesce(count(comment_likes.id), 0)::int as likes_count,
+        coalesce(max(case when comment_likes.user_id = ${viewerParam} then 1 else 0 end), 0)::int = 1 as liked_by_current_user
       from study_post_comments comments
       inner join users on users.id = comments.user_id
       inner join study_posts posts on posts.id = comments.post_id
+      left join study_comment_likes comment_likes on comment_likes.comment_id = comments.id
       ${whereClause}
+      group by
+        comments.id,
+        comments.post_id,
+        comments.parent_comment_id,
+        comments.content,
+        comments.created_at,
+        comments.updated_at,
+        users.id,
+        users.name,
+        users.avatar_url,
+        posts.title
       order by comments.created_at desc
       `,
       params
     );
 
     return rows.map((row: AdminCommentRow): AdminComment => ({
-      ...mapComment(row, undefined, "admin"),
+      ...mapCommentRow(row, undefined, "admin"),
       postTitle: row.post_title,
     }));
   }
 
   public async listCommentsByPostId(postId: string, viewerUserId?: string, viewerRole?: "admin" | "user") {
     const dataSource = await getDataSource();
-    const rows = await dataSource.query(
-      `
-      select
-        comments.content,
-        comments.created_at,
-        comments.id,
-        comments.post_id,
-        comments.updated_at,
-        users.id as author_id,
-        users.name as author_name
-      from study_post_comments comments
-      inner join users on users.id = comments.user_id
-      where comments.post_id = $1
-      order by comments.created_at asc
-      `,
-      [postId]
-    );
+    const rows = await dataSource.query(buildCommentQuery("where comments.post_id = $1"), [postId, viewerUserId ?? ""]);
 
-    return rows.map((row: CommentRow) => mapComment(row, viewerUserId, viewerRole));
+    return buildCommentTree(rows as CommentRow[], viewerUserId, viewerRole);
   }
 }
