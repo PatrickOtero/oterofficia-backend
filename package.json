@@ -2,37 +2,50 @@
   "name": "oterofficia-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.ts",
+  "main": "dist/src/server.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "nodemon --exec ts-node ./src/server.ts",
-    "start": "node dist/server.js"
+    "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules src/server.ts",
+    "build": "tsc --project tsconfig.json",
+    "start": "node dist/src/server.js",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "migration:generate": "typeorm-ts-node-commonjs -d src/shared/infra/database/data-source.ts migration:generate src/shared/infra/database/migrations/AutoMigration",
+    "migration:run": "typeorm-ts-node-commonjs -d src/shared/infra/database/data-source.ts migration:run",
+    "migration:revert": "typeorm-ts-node-commonjs -d src/shared/infra/database/data-source.ts migration:revert",
+    "migrate:latest": "npm run migration:run",
+    "migrate:rollback": "npm run migration:revert"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PatrickOtero/oterofficia-backend.git"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/PatrickOtero/oterofficia-backend/issues"
-  },
-  "homepage": "https://github.com/PatrickOtero/oterofficia-backend#readme",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1032.0",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.14",
+    "@types/multer": "^2.1.0",
     "@types/node": "^18.11.3",
     "@types/nodemailer": "^6.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "knex": "^2.3.0",
+    "multer": "^2.1.1",
     "nodemailer": "^6.8.0",
     "nodemailer-express-handlebars": "^5.0.0",
-    "nodemon": "^2.0.20",
-    "pg": "^8.8.0",
-    "ts-node": "^10.9.1",
-    "uuidv4": "^6.2.13"
+    "pg": "^8.13.0",
+    "reflect-metadata": "^0.2.2",
+    "ts-node": "^10.9.2",
+    "tsyringe": "^4.10.0",
+    "typeorm": "^0.3.28"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.0"
   }
 }

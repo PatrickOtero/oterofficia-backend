@@ -1,25 +1,37 @@
-const nodemailer = require('nodemailer')
-const handlebars = require('nodemailer-express-handlebars')
+import nodemailer from "nodemailer";
+import { injectable } from "tsyringe";
+import { IMailService, MailTemplateOptions } from "./mail.service.interface";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.NODEMAILER_HOST,
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.NODEMAILER_USER,
-    pass: process.env.NODEMAILER_PASS,
-  },
-})
+const handlebars = require("nodemailer-express-handlebars");
 
-transporter.use(
-  'compile',
-  handlebars({
-    viewEngine: {
-      extname: '.handlebars',
-      defaultLayout: false,
-    },
-    viewPath: 'src/views/',
-  }),
-)
+@injectable()
+export class NodemailerService implements IMailService {
+  private readonly transporter: ReturnType<typeof nodemailer.createTransport>;
 
-export default transporter
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      auth: {
+        pass: process.env.NODEMAILER_PASS,
+        user: process.env.NODEMAILER_USER,
+      },
+      host: process.env.NODEMAILER_HOST,
+      port: 587,
+      secure: false,
+    });
+
+    this.transporter.use(
+      "compile",
+      handlebars({
+        viewEngine: {
+          defaultLayout: false,
+          extname: ".handlebars",
+        },
+        viewPath: "src/views/",
+      })
+    );
+  }
+
+  public async sendMail(options: MailTemplateOptions) {
+    return this.transporter.sendMail(options);
+  }
+}
