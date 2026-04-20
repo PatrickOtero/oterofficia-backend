@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { aboutRouter, adminAboutRouter } from "./about.routes";
 import { authRouter } from "./auth.routes";
 import { adminCommentsRouter, commentsRouter } from "./comments.routes";
 import { contactRouter } from "./contact.routes";
@@ -11,6 +12,7 @@ const router = Router();
 
 router.use("/uploads", uploadsRouter);
 router.use("/auth", authRouter);
+router.use("/about", aboutRouter);
 router.use("/studies", studiesRouter);
 router.use("/projects", projectsRouter);
 router.use("/", contactRouter);
@@ -19,5 +21,6 @@ router.use("/", likesRouter);
 router.use("/admin/uploads", adminUploadsRouter);
 router.use("/admin/studies", adminCommentsRouter);
 router.use("/admin/studies", adminStudiesRouter);
+router.use("/admin/about", adminAboutRouter);
 
 export { router };

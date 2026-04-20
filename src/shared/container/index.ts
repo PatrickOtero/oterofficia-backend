@@ -1,4 +1,5 @@
 import { container } from "tsyringe";
+import { AboutRepository } from "../../modules/about/about.repository";
 import { AuthRepository } from "../../modules/auth/auth.repository";
 import { CommentRepository } from "../../modules/comments/comment.repository";
 import { LikeRepository } from "../../modules/likes/like.repository";
@@ -7,6 +8,7 @@ import { StudyRepository } from "../../modules/studies/study.repository";
 import { CloudflareR2StorageProvider } from "../../modules/uploads/storage/cloudflare-r2-storage.provider";
 import { LocalStorageProvider } from "../../modules/uploads/storage/local-storage.provider";
 import { NodemailerService } from "../../services/nodemailer";
+import { IAboutRepository } from "../../modules/about/about.repository.interface";
 import { IAuthRepository } from "../../modules/auth/auth.repository.interface";
 import { ICommentRepository } from "../../modules/comments/comment.repository.interface";
 import { ILikeRepository } from "../../modules/likes/like.repository.interface";
@@ -15,6 +17,7 @@ import { IStudyRepository } from "../../modules/studies/study.repository.interfa
 import { IMailService } from "../../services/mail.service.interface";
 import { TOKENS } from "./tokens";
 
+container.registerSingleton<IAboutRepository>(TOKENS.AboutRepository, AboutRepository);
 container.registerSingleton<IAuthRepository>(TOKENS.AuthRepository, AuthRepository);
 container.registerSingleton<IStudyRepository>(TOKENS.StudyRepository, StudyRepository);
 container.registerSingleton<ICommentRepository>(TOKENS.CommentRepository, CommentRepository);

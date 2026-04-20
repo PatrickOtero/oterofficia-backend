@@ -10,8 +10,14 @@ const mapProject = (project: ProjectEntity): ProjectResponse => ({
   frontend_url: project.frontendUrl,
   id: project.id,
   image_url: project.imageUrl,
+  organization_name: project.organizationName,
   project_desc: project.projectDescription,
+  project_highlight: project.projectHighlight,
   project_name: project.projectName,
+  project_role: project.projectRole,
+  project_status: project.projectStatus,
+  project_tags: Array.isArray(project.projectTags) ? project.projectTags : [],
+  project_track: project.projectTrack,
   video_url: project.videoUrl,
 });
 
@@ -59,10 +65,6 @@ export class ProjectService {
 
   public async listProjects() {
     const allProjects = await this.repository.findAll();
-
-    if (!allProjects.length) {
-      throw new AppError("Nao ha projetos cadastrados.", 404, "projects_not_found");
-    }
 
     return allProjects.map((project) => mapProject(project));
   }

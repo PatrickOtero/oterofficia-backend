@@ -14,6 +14,24 @@ export class ProjectEntity {
   @Column("text", { name: "project_desc" })
   projectDescription!: string;
 
+  @Column("varchar", { name: "project_status", length: 20, default: "completed" })
+  projectStatus!: "completed" | "in_progress";
+
+  @Column("varchar", { name: "project_track", length: 20, default: "personal" })
+  projectTrack!: "personal" | "soujunior";
+
+  @Column("varchar", { name: "organization_name", length: 120, nullable: true })
+  organizationName!: string | null;
+
+  @Column("varchar", { name: "project_role", length: 140, nullable: true })
+  projectRole!: string | null;
+
+  @Column("varchar", { name: "project_highlight", length: 220, nullable: true })
+  projectHighlight!: string | null;
+
+  @Column("jsonb", { name: "project_tags", default: () => "'[]'::jsonb" })
+  projectTags!: string[];
+
   @Column("text", { name: "frontend_url", nullable: true })
   frontendUrl!: string | null;
 

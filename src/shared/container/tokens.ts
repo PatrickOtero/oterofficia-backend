@@ -1,4 +1,5 @@
 export const TOKENS = {
+  AboutRepository: "AboutRepository",
   AuthRepository: "AuthRepository",
   CloudflareR2StorageProvider: "CloudflareR2StorageProvider",
   CommentRepository: "CommentRepository",

@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
 import { DataSource } from "typeorm";
+import { AboutPageEntity } from "./entities/AboutPageEntity";
 import { ProjectEntity } from "./entities/ProjectEntity";
 import { StudyCommentLikeEntity } from "./entities/StudyCommentLikeEntity";
 import { StudyPostBlockEntity } from "./entities/StudyPostBlockEntity";
@@ -11,6 +12,8 @@ import { UserEntity } from "./entities/UserEntity";
 import { UserActionTokenEntity } from "./entities/UserActionTokenEntity";
 import { UserSessionEntity } from "./entities/UserSessionEntity";
 import { InitAppSchema1713480000000 } from "./migrations/1713480000000-InitAppSchema";
+import { CreateAboutPage1713660000000 } from "./migrations/1713660000000-CreateAboutPage";
+import { ExpandProjectsPortfolio1713750000000 } from "./migrations/1713750000000-ExpandProjectsPortfolio";
 import { ExtendUserAuthAndComments1713570000000 } from "./migrations/1713570000000-ExtendUserAuthAndComments";
 
 dotenv.config();
@@ -37,6 +40,7 @@ const buildDataSource = () =>
     synchronize: false,
     logging: false,
     entities: [
+      AboutPageEntity,
       ProjectEntity,
       StudyPostEntity,
       StudyPostBlockEntity,
@@ -47,7 +51,12 @@ const buildDataSource = () =>
       UserActionTokenEntity,
       UserSessionEntity,
     ],
-    migrations: [InitAppSchema1713480000000, ExtendUserAuthAndComments1713570000000],
+    migrations: [
+      InitAppSchema1713480000000,
+      ExtendUserAuthAndComments1713570000000,
+      CreateAboutPage1713660000000,
+      ExpandProjectsPortfolio1713750000000,
+    ],
   });
 
 class TypeOrmSingleton {
