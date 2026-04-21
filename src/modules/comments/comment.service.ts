@@ -2,6 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { AppError } from "../../core/errors/AppError";
 import { TOKENS } from "../../shared/container/tokens";
 import { AuthenticatedSessionUser } from "../auth/auth.types";
+import { EngagementService } from "../engagement/engagement.service";
 import { IStudyRepository } from "../studies/study.repository.interface";
 import { AdminCommentFilters, CommentLikeResponse } from "./comment.types";
 import { ICommentRepository } from "./comment.repository.interface";
@@ -12,7 +13,8 @@ export class CommentService {
     @inject(TOKENS.CommentRepository)
     private readonly comments: ICommentRepository,
     @inject(TOKENS.StudyRepository)
-    private readonly studies: IStudyRepository
+    private readonly studies: IStudyRepository,
+    private readonly engagement: EngagementService
   ) {}
 
   public async createComment(
@@ -22,6 +24,7 @@ export class CommentService {
     parentCommentId?: string | null
   ) {
     const post = await this.studies.findById(postId);
+    let parentCommentOwnerId: string | null = null;
 
     if (!post || post.status !== "published") {
       throw new AppError("Nao foi possivel comentar neste estudo.", 404, "study_not_found");
@@ -37,6 +40,8 @@ export class CommentService {
           "parent_comment_not_found"
         );
       }
+
+      parentCommentOwnerId = parentComment.user_id;
     }
 
     const createdComment = await this.comments.createComment(
@@ -55,6 +60,13 @@ export class CommentService {
     }
 
     const commentsCount = await this.studies.countCommentsByPostId(postId);
+
+    await this.engagement.registerCommentCreated({
+      actor: user,
+      comment: createdComment,
+      parentCommentOwnerId,
+      study: post,
+    });
 
     return {
       comment: createdComment,
@@ -138,6 +150,16 @@ export class CommentService {
 
     if (shouldBeLiked && !alreadyLiked) {
       await this.comments.createLike(commentId, user.id);
+      const post = await this.studies.findById(existingComment.post_id);
+
+      if (post) {
+        await this.engagement.registerCommentLike({
+          actor: user,
+          commentId,
+          commentOwnerUserId: existingComment.user_id,
+          study: post,
+        });
+      }
     }
 
     if (!shouldBeLiked && alreadyLiked) {

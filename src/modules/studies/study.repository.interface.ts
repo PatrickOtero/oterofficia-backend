@@ -20,6 +20,7 @@ export type StudyReference = {
   id: string;
   slug: string;
   status: StudyStatus;
+  title: string;
 };
 
 export interface IStudyRepository {

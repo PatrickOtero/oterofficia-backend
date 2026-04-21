@@ -3,6 +3,7 @@ export const TOKENS = {
   AuthRepository: "AuthRepository",
   CloudflareR2StorageProvider: "CloudflareR2StorageProvider",
   CommentRepository: "CommentRepository",
+  EngagementRepository: "EngagementRepository",
   LikeRepository: "LikeRepository",
   LocalStorageProvider: "LocalStorageProvider",
   MailService: "MailService",

@@ -2,6 +2,8 @@ import "reflect-metadata";
 import dotenv from "dotenv";
 import { DataSource } from "typeorm";
 import { AboutPageEntity } from "./entities/AboutPageEntity";
+import { InteractionEventEntity } from "./entities/InteractionEventEntity";
+import { NotificationEntity } from "./entities/NotificationEntity";
 import { ProjectEntity } from "./entities/ProjectEntity";
 import { StudyCommentLikeEntity } from "./entities/StudyCommentLikeEntity";
 import { StudyPostBlockEntity } from "./entities/StudyPostBlockEntity";
@@ -15,6 +17,7 @@ import { InitAppSchema1713480000000 } from "./migrations/1713480000000-InitAppSc
 import { CreateAboutPage1713660000000 } from "./migrations/1713660000000-CreateAboutPage";
 import { ExpandProjectsPortfolio1713750000000 } from "./migrations/1713750000000-ExpandProjectsPortfolio";
 import { ExtendUserAuthAndComments1713570000000 } from "./migrations/1713570000000-ExtendUserAuthAndComments";
+import { CreateEngagementInfrastructure1713840000000 } from "./migrations/1713840000000-CreateEngagementInfrastructure";
 
 dotenv.config();
 
@@ -77,6 +80,8 @@ const buildDataSource = () =>
     logging: false,
     entities: [
       AboutPageEntity,
+      InteractionEventEntity,
+      NotificationEntity,
       ProjectEntity,
       StudyPostEntity,
       StudyPostBlockEntity,
@@ -92,6 +97,7 @@ const buildDataSource = () =>
       ExtendUserAuthAndComments1713570000000,
       CreateAboutPage1713660000000,
       ExpandProjectsPortfolio1713750000000,
+      CreateEngagementInfrastructure1713840000000,
     ],
   });
 

@@ -1,11 +1,12 @@
 import { randomUUID } from "crypto";
 import { inject, injectable } from "tsyringe";
 import { AppError } from "../../core/errors/AppError";
-import { TOKENS } from "../../shared/container/tokens";
 import { slugify } from "../../core/utils/slug";
-import { estimateReadingTime } from "./study.utils";
+import { TOKENS } from "../../shared/container/tokens";
+import { EngagementService } from "../engagement/engagement.service";
 import { IStudyRepository } from "./study.repository.interface";
 import { AdminStudyFilters, StudyListFilters, StudyStatus, UpsertStudyInput } from "./study.types";
+import { estimateReadingTime } from "./study.utils";
 
 const resolveUniqueSlug = async (
   repository: IStudyRepository,
@@ -16,7 +17,7 @@ const resolveUniqueSlug = async (
   const baseSlug = slugify(incomingSlug || title);
 
   if (!baseSlug) {
-    throw new AppError("NÃ£o foi possÃ­vel gerar um slug vÃ¡lido para esta postagem.", 400, "invalid_slug");
+    throw new AppError("NÃƒÂ£o foi possÃƒÂ­vel gerar um slug vÃƒÂ¡lido para esta postagem.", 400, "invalid_slug");
   }
 
   let candidate = baseSlug;
@@ -54,7 +55,8 @@ const resolveReadingTime = (input: UpsertStudyInput) =>
 export class StudyService {
   constructor(
     @inject(TOKENS.StudyRepository)
-    private readonly repository: IStudyRepository
+    private readonly repository: IStudyRepository,
+    private readonly engagement: EngagementService
   ) {}
 
   public async createStudy(input: UpsertStudyInput) {
@@ -84,7 +86,7 @@ export class StudyService {
     const deletedRows = await this.repository.deleteStudy(postId);
 
     if (!deletedRows) {
-      throw new AppError("Estudo nÃ£o encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo nÃƒÂ£o encontrado.", 404, "study_not_found");
     }
   }
 
@@ -96,7 +98,7 @@ export class StudyService {
     const study = await this.repository.getStudyDetailById(postId, currentUserId);
 
     if (!study) {
-      throw new AppError("Estudo nÃ£o encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo nÃƒÂ£o encontrado.", 404, "study_not_found");
     }
 
     return study;
@@ -106,7 +108,16 @@ export class StudyService {
     const study = await this.repository.getPublishedStudyDetailBySlug(slug, currentUserId);
 
     if (!study) {
-      throw new AppError("Estudo nÃ£o encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo nÃƒÂ£o encontrado.", 404, "study_not_found");
+    }
+
+    if (currentUserId) {
+      await this.engagement.registerStudyView(currentUserId, {
+        id: study.id,
+        slug: study.slug,
+        status: study.status,
+        title: study.title,
+      });
     }
 
     return study;
@@ -132,7 +143,7 @@ export class StudyService {
     const existingStudy = await this.repository.getStudyDetailById(postId, currentUserId);
 
     if (!existingStudy) {
-      throw new AppError("Estudo nÃ£o encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo nÃƒÂ£o encontrado.", 404, "study_not_found");
     }
 
     await this.repository.updateStudy(postId, {
@@ -157,7 +168,7 @@ export class StudyService {
     const existingStudy = await this.repository.getStudyDetailById(postId, currentUserId);
 
     if (!existingStudy) {
-      throw new AppError("Estudo nÃ£o encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo nÃƒÂ£o encontrado.", 404, "study_not_found");
     }
 
     const slug = await resolveUniqueSlug(this.repository, input.title, input.slug, postId);
