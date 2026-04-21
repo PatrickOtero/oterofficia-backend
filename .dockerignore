@@ -2,6 +2,9 @@ node_modules
 dist
 .git
 .qodo
+.env
+.env.*
+!.env.example
 coverage
 docs/api
 npm-debug.log

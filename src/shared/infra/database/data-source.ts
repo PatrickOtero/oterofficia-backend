@@ -18,6 +18,15 @@ import { ExtendUserAuthAndComments1713570000000 } from "./migrations/17135700000
 
 dotenv.config();
 
+const LOCAL_DATABASE_HOSTS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "::1",
+  "postgres",
+  "db",
+  "host.docker.internal",
+]);
+
 const shouldUseSsl = () => {
   const sslValue = process.env.DATABASE_SSL?.trim().toLowerCase();
 
@@ -29,7 +38,34 @@ const shouldUseSsl = () => {
     return true;
   }
 
-  return !process.env.DATABASE_URL?.includes("localhost");
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (!databaseUrl) {
+    return false;
+  }
+
+  try {
+    const parsedUrl = new URL(databaseUrl);
+    const sslMode = parsedUrl.searchParams.get("sslmode")?.trim().toLowerCase();
+    const sslParam = parsedUrl.searchParams.get("ssl")?.trim().toLowerCase();
+
+    if (sslMode === "disable" || sslParam === "false") {
+      return false;
+    }
+
+    if (
+      sslMode === "require" ||
+      sslMode === "verify-ca" ||
+      sslMode === "verify-full" ||
+      sslParam === "true"
+    ) {
+      return true;
+    }
+
+    return !LOCAL_DATABASE_HOSTS.has(parsedUrl.hostname.toLowerCase());
+  } catch {
+    return !databaseUrl.includes("localhost");
+  }
 };
 
 const buildDataSource = () =>

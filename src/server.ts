@@ -14,6 +14,8 @@ dotenv.config();
 
 const server = express();
 const port = Number(process.env.PORT || 3002);
+const shouldRunMigrations =
+  process.env.RUN_MIGRATIONS?.trim().toLowerCase() !== "false";
 
 server.use(express.json());
 server.use(cors());
@@ -31,7 +33,10 @@ server.use(router);
 server.use(errorHandler);
 
 const bootstrap = async () => {
-  await runPendingMigrations();
+  if (shouldRunMigrations) {
+    await runPendingMigrations();
+  }
+
   await ensureAdminAccount();
 
   console.log(`Server connected on PORT ${port}`);
