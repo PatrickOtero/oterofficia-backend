@@ -1,6 +1,6 @@
 /node_modules
 .npm-cache
 dist
-storage/
+/storage/
 .env
 .qodo
