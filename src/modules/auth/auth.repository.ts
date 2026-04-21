@@ -3,6 +3,7 @@ import { getDataSource } from "../../shared/infra/database/data-source";
 import { UserActionTokenEntity } from "../../shared/infra/database/entities/UserActionTokenEntity";
 import { UserSessionEntity } from "../../shared/infra/database/entities/UserSessionEntity";
 import { UserEntity } from "../../shared/infra/database/entities/UserEntity";
+import { normalizeUploadUrl } from "../uploads/upload-url";
 import {
   CreateSessionInput,
   CreateUserActionTokenInput,
@@ -21,7 +22,7 @@ import {
 const toIso = (value?: Date | null) => (value ? value.toISOString() : null);
 
 const mapUserEntity = (user: UserEntity): UserRecord => ({
-  avatarUrl: user.avatarUrl ?? null,
+  avatarUrl: normalizeUploadUrl(user.avatarUrl ?? null),
   birthDate: user.birthDate ?? null,
   createdAt: user.createdAt.toISOString(),
   email: user.email,
@@ -34,7 +35,7 @@ const mapUserEntity = (user: UserEntity): UserRecord => ({
 });
 
 const mapUserProfile = (user: UserEntity): UserProfile => ({
-  avatarUrl: user.avatarUrl ?? null,
+  avatarUrl: normalizeUploadUrl(user.avatarUrl ?? null),
   birthDate: user.birthDate ?? null,
   createdAt: user.createdAt.toISOString(),
   email: user.email,

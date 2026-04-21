@@ -1,12 +1,13 @@
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../../shared/container/tokens";
+import { normalizeUploadPayload } from "../uploads/upload-url";
 import { IAboutRepository } from "./about.repository.interface";
 import { ABOUT_PAGE_ID, createDefaultAboutPageInput } from "./about.defaults";
 import { AboutPage, AboutInputBlock, UpsertAboutPageInput } from "./about.types";
 
 const normalizeBlocks = (blocks: AboutInputBlock[]) =>
   blocks.map((block) => ({
-    data: block.data,
+    data: normalizeUploadPayload(block.data),
     id: block.id,
     type: block.type,
   }));

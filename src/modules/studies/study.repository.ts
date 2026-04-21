@@ -3,6 +3,7 @@ import { getDataSource } from "../../shared/infra/database/data-source";
 import { StudyPostBlockEntity } from "../../shared/infra/database/entities/StudyPostBlockEntity";
 import { StudyPostEntity } from "../../shared/infra/database/entities/StudyPostEntity";
 import { injectable } from "tsyringe";
+import { normalizeUploadPayload, normalizeUploadUrl } from "../uploads/upload-url";
 import {
   AdminStudyFilters,
   StudyBlock,
@@ -72,7 +73,7 @@ const toTags = (value: unknown) =>
 const mapStudySummary = (row: StudyPostRow): StudySummary => ({
   category: row.category,
   commentsCount: toNumber(row.comments_count),
-  coverImage: row.cover_image,
+  coverImage: normalizeUploadUrl(row.cover_image),
   createdAt: toIso(row.created_at) as string,
   excerpt: row.excerpt,
   id: row.id,
@@ -93,7 +94,7 @@ const mapStudyBlock = (row: StudyBlockRow): StudyBlock => ({
   createdAt: toIso(row.created_at) as string,
   data:
     row.data && typeof row.data === "object" && !Array.isArray(row.data)
-      ? (row.data as Record<string, unknown>)
+      ? normalizeUploadPayload(row.data as Record<string, unknown>)
       : {},
   id: row.id,
   position: row.position,

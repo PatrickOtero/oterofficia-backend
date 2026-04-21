@@ -2,6 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { AppError } from "../../core/errors/AppError";
 import { TOKENS } from "../../shared/container/tokens";
 import { ProjectEntity } from "../../shared/infra/database/entities/ProjectEntity";
+import { normalizeUploadUrl } from "../uploads/upload-url";
 import { IProjectRepository } from "./project.repository.interface";
 import { ProjectInput, ProjectResponse } from "./project.types";
 
@@ -9,7 +10,7 @@ const mapProject = (project: ProjectEntity): ProjectResponse => ({
   backend_url: project.backendUrl,
   frontend_url: project.frontendUrl,
   id: project.id,
-  image_url: project.imageUrl,
+  image_url: normalizeUploadUrl(project.imageUrl),
   organization_name: project.organizationName,
   project_desc: project.projectDescription,
   project_highlight: project.projectHighlight,

@@ -3,6 +3,7 @@ import { injectable } from "tsyringe";
 import { getDataSource } from "../../shared/infra/database/data-source";
 import { StudyCommentLikeEntity } from "../../shared/infra/database/entities/StudyCommentLikeEntity";
 import { StudyPostCommentEntity } from "../../shared/infra/database/entities/StudyPostCommentEntity";
+import { normalizeUploadUrl } from "../uploads/upload-url";
 import { AdminComment, CommentPermissionRecord, CreateCommentInput, ICommentRepository } from "./comment.repository.interface";
 import { AdminCommentFilters, StudyComment } from "./comment.types";
 
@@ -32,7 +33,7 @@ const mapCommentRow = (
   viewerRole?: "admin" | "user"
 ): StudyComment => ({
   author: {
-    avatarUrl: row.author_avatar_url,
+    avatarUrl: normalizeUploadUrl(row.author_avatar_url),
     id: row.author_id,
     name: row.author_name,
   },

@@ -12,6 +12,7 @@ import { AppError } from "../../core/errors/AppError";
 import { TOKENS } from "../../shared/container/tokens";
 import { IMailService } from "../../services/mail.service.interface";
 import { UploadService } from "../uploads/upload.service";
+import { buildPublicUploadUrl } from "../uploads/upload-url";
 import { IAuthRepository } from "./auth.repository.interface";
 import { AuthPayload, RegisterResponse, UserProfile, UserRecord } from "./auth.types";
 
@@ -392,7 +393,7 @@ export class AuthService {
     }
 
     return this.updateProfile(userId, {
-      avatarUrl: `${process.env.PUBLIC_API_URL || resolveSiteUrl().replace(":3000", ":3002")}/uploads/${uploadedAvatar.key}`,
+      avatarUrl: buildPublicUploadUrl(uploadedAvatar.key),
     });
   }
 
