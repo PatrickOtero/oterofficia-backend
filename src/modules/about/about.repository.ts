@@ -1,6 +1,7 @@
 import { injectable } from "tsyringe";
 import { getDataSource } from "../../shared/infra/database/data-source";
 import { AboutPageEntity } from "../../shared/infra/database/entities/AboutPageEntity";
+import { normalizeUploadPayload } from "../uploads/upload-url";
 import { IAboutRepository, AboutPagePersistenceInput } from "./about.repository.interface";
 import { AboutBlock, AboutInputBlock, AboutPage } from "./about.types";
 
@@ -9,7 +10,7 @@ const toIso = (value: Date | string) => new Date(value).toISOString();
 const normalizeBlock = (block: AboutInputBlock): AboutBlock => ({
   data:
     block.data && typeof block.data === "object" && !Array.isArray(block.data)
-      ? block.data
+      ? normalizeUploadPayload(block.data)
       : {},
   id: String(block.id),
   type: block.type,
