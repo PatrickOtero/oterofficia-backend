@@ -7,6 +7,7 @@ import { adminEngagementRouter, engagementRouter } from "./engagement.routes";
 import { likesRouter } from "./likes.routes";
 import { notificationsRouter } from "./notifications.routes";
 import { projectsRouter } from "./projects.routes";
+import { robotAssistantRouter } from "./robot-assistant.routes";
 import { adminStudiesRouter, studiesRouter } from "./studies.routes";
 import { adminUploadsRouter, uploadsRouter } from "./uploads.routes";
 
@@ -19,6 +20,7 @@ router.use("/studies", studiesRouter);
 router.use("/projects", projectsRouter);
 router.use("/", engagementRouter);
 router.use("/", notificationsRouter);
+router.use("/", robotAssistantRouter);
 router.use("/", contactRouter);
 router.use("/", commentsRouter);
 router.use("/", likesRouter);
