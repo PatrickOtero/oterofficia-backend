@@ -66,6 +66,25 @@ export type NotificationFeed = {
   unreadCount: number;
 };
 
+export type SiteVisitorTrackInput = {
+  lastPath?: string | null;
+  referrer?: string | null;
+  shouldIgnore?: boolean;
+  userAgent?: string | null;
+  visitorKey: string;
+};
+
+export type SiteVisitorSummary = {
+  entriesSince: number;
+  lastVisitAt: string | null;
+  newVisitorsSince: number;
+  since: string | null;
+  totalEntries: number;
+  totalVisitors: number;
+  until: string | null;
+  visitorsSince: number;
+};
+
 export type InteractionAnalyticsOverview = {
   totalEvents: number;
   trackedUsers: number;

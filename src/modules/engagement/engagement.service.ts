@@ -17,6 +17,26 @@ export class EngagementService {
     return this.repository.getAdminInteractionAnalytics();
   }
 
+  public async getSiteVisitorSummary(input?: { since?: Date | null; until?: Date | null }) {
+    return this.repository.getSiteVisitorSummary(input);
+  }
+
+  public async registerSiteVisit(input: {
+    isAdminUser?: boolean;
+    lastPath?: string | null;
+    referrer?: string | null;
+    userAgent?: string | null;
+    visitorKey: string;
+  }) {
+    await this.repository.recordSiteVisit({
+      lastPath: input.lastPath ?? null,
+      referrer: input.referrer ?? null,
+      shouldIgnore: input.isAdminUser ?? false,
+      userAgent: input.userAgent ?? null,
+      visitorKey: input.visitorKey,
+    });
+  }
+
   public async listNotifications(recipientUserId: string, limit?: number) {
     return this.repository.listNotificationFeed(recipientUserId, limit);
   }

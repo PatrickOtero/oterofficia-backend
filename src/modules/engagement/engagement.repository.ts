@@ -19,6 +19,8 @@ import {
   InteractionAnalyticsUserRow,
   NotificationFeed,
   NotificationItem,
+  SiteVisitorSummary,
+  SiteVisitorTrackInput,
 } from "./engagement.types";
 
 type ActorRow = {
@@ -71,6 +73,15 @@ type SeriesRow = {
   day_label: string;
   likes: number | string;
   reads: number | string;
+};
+
+type VisitorSummaryRow = {
+  entries_since: number | string;
+  last_visit_at: Date | string | null;
+  new_visitors_since: number | string;
+  total_entries: number | string;
+  total_visitors: number | string;
+  visitors_since: number | string;
 };
 
 const toIso = (value: Date | string | null) => (value ? new Date(value).toISOString() : null);
@@ -389,6 +400,126 @@ export class EngagementRepository implements IEngagementRepository {
       .execute();
 
     return Boolean(result.affected);
+  }
+
+  public async recordSiteVisit(input: SiteVisitorTrackInput) {
+    if (input.shouldIgnore) {
+      return;
+    }
+
+    const dataSource = await getDataSource();
+
+    await dataSource.transaction(async (manager) => {
+      await manager.query(
+        `
+          insert into site_visit_events (
+            id,
+            visitor_key,
+            visited_at,
+            path,
+            user_agent,
+            referrer
+          )
+          values ($1, $2, now(), $3, $4, $5)
+        `,
+        [
+          randomUUID(),
+          input.visitorKey,
+          input.lastPath ?? null,
+          input.userAgent ?? null,
+          input.referrer ?? null,
+        ]
+      );
+
+      await manager.query(
+        `
+          insert into site_visitors (
+            id,
+            visitor_key,
+            first_seen_at,
+            last_seen_at,
+            entry_count,
+            last_path,
+            user_agent,
+            referrer
+          )
+          values ($1, $2, now(), now(), 1, $3, $4, $5)
+          on conflict (visitor_key)
+          do update
+          set
+            last_seen_at = now(),
+            entry_count = site_visitors.entry_count + 1,
+            last_path = excluded.last_path,
+            user_agent = excluded.user_agent,
+            referrer = coalesce(excluded.referrer, site_visitors.referrer)
+        `,
+        [
+          randomUUID(),
+          input.visitorKey,
+          input.lastPath ?? null,
+          input.userAgent ?? null,
+          input.referrer ?? null,
+        ]
+      );
+    });
+  }
+
+  public async getSiteVisitorSummary(input?: {
+    since?: Date | null;
+    until?: Date | null;
+  }): Promise<SiteVisitorSummary> {
+    const dataSource = await getDataSource();
+    const since = input?.since ?? null;
+    const until = input?.until ?? null;
+    const rows = await dataSource.query(
+      `
+        select
+          (select count(*)::int from site_visitors) as total_visitors,
+          (select coalesce(sum(entry_count), 0)::int from site_visitors) as total_entries,
+          (select max(last_seen_at) from site_visitors) as last_visit_at,
+          case
+            when $1::timestamptz is null then 0
+            else (
+              select count(distinct visitor_key)::int
+              from site_visit_events
+              where visited_at >= $1
+                and visited_at < coalesce($2::timestamptz, now())
+            )
+          end as visitors_since,
+          case
+            when $1::timestamptz is null then 0
+            else (
+              select count(*)::int
+              from site_visit_events
+              where visited_at >= $1
+                and visited_at < coalesce($2::timestamptz, now())
+            )
+          end as entries_since,
+          case
+            when $1::timestamptz is null then 0
+            else (
+              select count(*)::int
+              from site_visitors
+              where first_seen_at >= $1
+                and first_seen_at < coalesce($2::timestamptz, now())
+            )
+          end as new_visitors_since
+      `,
+      [since?.toISOString() ?? null, until?.toISOString() ?? null]
+    );
+
+    const row = rows[0] as VisitorSummaryRow | undefined;
+
+    return {
+      entriesSince: toNumber(row?.entries_since),
+      lastVisitAt: toIso(row?.last_visit_at ?? null),
+      newVisitorsSince: toNumber(row?.new_visitors_since),
+      since: toIso(since),
+      totalEntries: toNumber(row?.total_entries),
+      totalVisitors: toNumber(row?.total_visitors),
+      until: toIso(until),
+      visitorsSince: toNumber(row?.visitors_since),
+    };
   }
 
   private buildTopUsersQuery(sortBy: "comments" | "likes" | "reads" | "total_interactions") {

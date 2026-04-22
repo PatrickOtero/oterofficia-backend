@@ -5,6 +5,8 @@ import { AboutPageEntity } from "./entities/AboutPageEntity";
 import { InteractionEventEntity } from "./entities/InteractionEventEntity";
 import { NotificationEntity } from "./entities/NotificationEntity";
 import { ProjectEntity } from "./entities/ProjectEntity";
+import { SiteVisitEventEntity } from "./entities/SiteVisitEventEntity";
+import { SiteVisitorEntity } from "./entities/SiteVisitorEntity";
 import { StudyCommentLikeEntity } from "./entities/StudyCommentLikeEntity";
 import { StudyPostBlockEntity } from "./entities/StudyPostBlockEntity";
 import { StudyPostCommentEntity } from "./entities/StudyPostCommentEntity";
@@ -18,6 +20,8 @@ import { CreateAboutPage1713660000000 } from "./migrations/1713660000000-CreateA
 import { ExpandProjectsPortfolio1713750000000 } from "./migrations/1713750000000-ExpandProjectsPortfolio";
 import { ExtendUserAuthAndComments1713570000000 } from "./migrations/1713570000000-ExtendUserAuthAndComments";
 import { CreateEngagementInfrastructure1713840000000 } from "./migrations/1713840000000-CreateEngagementInfrastructure";
+import { CreateSiteVisitEvents1713860000000 } from "./migrations/1713860000000-CreateSiteVisitEvents";
+import { CreateSiteVisitors1713850000000 } from "./migrations/1713850000000-CreateSiteVisitors";
 
 dotenv.config();
 
@@ -83,6 +87,8 @@ const buildDataSource = () =>
       InteractionEventEntity,
       NotificationEntity,
       ProjectEntity,
+      SiteVisitEventEntity,
+      SiteVisitorEntity,
       StudyPostEntity,
       StudyPostBlockEntity,
       StudyCommentLikeEntity,
@@ -98,6 +104,8 @@ const buildDataSource = () =>
       CreateAboutPage1713660000000,
       ExpandProjectsPortfolio1713750000000,
       CreateEngagementInfrastructure1713840000000,
+      CreateSiteVisitors1713850000000,
+      CreateSiteVisitEvents1713860000000,
     ],
   });
 

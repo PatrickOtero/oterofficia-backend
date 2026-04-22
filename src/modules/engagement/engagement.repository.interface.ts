@@ -5,6 +5,8 @@ import {
   EngagementRecipient,
   InteractionAnalyticsData,
   NotificationFeed,
+  SiteVisitorSummary,
+  SiteVisitorTrackInput,
 } from "./engagement.types";
 
 export interface IEngagementRepository {
@@ -23,4 +25,6 @@ export interface IEngagementRepository {
   listPostParticipantRecipients(postId: string, excludedUserIds: string[]): Promise<EngagementRecipient[]>;
   markAllNotificationsRead(recipientUserId: string): Promise<void>;
   markNotificationRead(notificationId: string, recipientUserId: string): Promise<boolean>;
+  recordSiteVisit(input: SiteVisitorTrackInput): Promise<void>;
+  getSiteVisitorSummary(input?: { since?: Date | null; until?: Date | null }): Promise<SiteVisitorSummary>;
 }
