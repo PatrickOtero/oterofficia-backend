@@ -12,6 +12,7 @@ import {
   RobotAssistantAdminSnapshot,
   RobotAssistantAuthFriction,
   RobotAssistantContentPerformance,
+  RobotAssistantProfile,
   RobotAssistantReadingContext,
   RobotAssistantRequest,
   RobotAssistantRouteExit,
