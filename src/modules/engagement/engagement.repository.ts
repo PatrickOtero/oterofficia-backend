@@ -523,16 +523,18 @@ export class EngagementRepository implements IEngagementRepository {
   }
 
   private buildTopUsersQuery(sortBy: "comments" | "likes" | "reads" | "total_interactions") {
-    const orderColumn =
-      sortBy === "comments"
-        ? "(comments + replies)"
-        : sortBy === "likes"
-          ? "(study_likes + comment_likes)"
-          : sortBy === "reads"
-            ? "reads"
-            : "total_interactions";
+  const orderColumn =
+    sortBy === "comments"
+      ? "comments_and_replies"
+      : sortBy === "likes"
+        ? "all_likes"
+        : sortBy === "reads"
+          ? "reads"
+          : "total_interactions";
 
-    return `
+  return `
+    select *
+    from (
       select
         users.id as user_id,
         users.name,
@@ -543,13 +545,22 @@ export class EngagementRepository implements IEngagementRepository {
         coalesce(sum(case when events.kind = 'comment_reply' then 1 else 0 end), 0)::int as replies,
         coalesce(sum(case when events.kind = 'study_like' then 1 else 0 end), 0)::int as study_likes,
         coalesce(sum(case when events.kind = 'comment_like' then 1 else 0 end), 0)::int as comment_likes,
+        (
+          coalesce(sum(case when events.kind = 'comment_created' then 1 else 0 end), 0) +
+          coalesce(sum(case when events.kind = 'comment_reply' then 1 else 0 end), 0)
+        )::int as comments_and_replies,
+        (
+          coalesce(sum(case when events.kind = 'study_like' then 1 else 0 end), 0) +
+          coalesce(sum(case when events.kind = 'comment_like' then 1 else 0 end), 0)
+        )::int as all_likes,
         count(*)::int as total_interactions,
         max(events.created_at) as last_interaction_at
       from interaction_events events
       inner join users on users.id = events.actor_user_id
       group by users.id, users.name, users.role, users.avatar_url
-      order by ${orderColumn} desc, last_interaction_at desc
-      limit 6
-    `;
+    ) ranked_users
+    order by ${orderColumn} desc, last_interaction_at desc
+    limit 6
+  `;
   }
 }
