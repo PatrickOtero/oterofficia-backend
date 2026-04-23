@@ -1,11 +1,10 @@
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../../shared/container/tokens";
-import { getDataSource } from "../../shared/infra/database/data-source";
 import { IAboutRepository } from "../about/about.repository.interface";
-import { UserRole } from "../auth/auth.types";
 import { IEngagementRepository } from "../engagement/engagement.repository.interface";
 import { IProjectRepository } from "../projects/project.repository.interface";
 import { ProjectResponse } from "../projects/project.types";
+import { IRobotAssistantRepository, RobotAssistantWindowMetricRow } from "./robot-assistant.repository.interface";
 import { normalizeUploadUrl } from "../uploads/upload-url";
 import { IStudyRepository } from "../studies/study.repository.interface";
 import {
@@ -22,66 +21,7 @@ import {
   RobotAssistantWindowComparison,
 } from "./robot-assistant.types";
 
-type RouteUsageRow = {
-  hits: number | string;
-  path: string;
-  visitors: number | string;
-};
-
-type RouteTransitionRow = {
-  count: number | string;
-  from_path: string;
-  to_path: string;
-};
-
-type RouteExitRow = {
-  exits: number | string;
-  path: string;
-};
-
-type AuthFrictionRow = {
-  attempts: number | string;
-  completions: number | string;
-  path: string;
-};
-
-type ContentPerformanceRow = {
-  category: string;
-  comments: number | string;
-  likes: number | string;
-  reading_time: number | string;
-  slug: string;
-  title: string;
-  views: number | string;
-};
-
-type WindowMetricRow = {
-  comments: number | string;
-  likes: number | string;
-  reads: number | string;
-  unique_visitors: number | string;
-  visits: number | string;
-};
-
 const toNumber = (value: number | string | null | undefined) => Number(value ?? 0);
-
-const normalizeRoutePathSql = (fieldName: string) => `
-  case
-    when ${fieldName} is null or ${fieldName} = '' then 'unknown'
-    when ${fieldName} = '/' then 'home'
-    when ${fieldName} like '/studies/%' then 'study-post'
-    when ${fieldName} = '/studies' then 'studies'
-    when ${fieldName} = '/portfolio' then 'portfolio'
-    when ${fieldName} = '/aboutme' then 'about'
-    when ${fieldName} = '/login' then 'login'
-    when ${fieldName} = '/register' then 'register'
-    when ${fieldName} = '/forgot-password' then 'forgot-password'
-    when ${fieldName} = '/reset-password' then 'reset-password'
-    when ${fieldName} = '/profile' then 'profile'
-    when ${fieldName} like '/admin/%' then 'admin'
-    else ${fieldName}
-  end
-`;
 
 const routeOrder = [
   "home",
@@ -210,13 +150,14 @@ export class RobotAssistantDataService {
     @inject(TOKENS.ProjectRepository)
     private readonly projectRepository: IProjectRepository,
     @inject(TOKENS.AboutRepository)
-    private readonly aboutRepository: IAboutRepository
+    private readonly aboutRepository: IAboutRepository,
+    @inject(TOKENS.RobotAssistantRepository)
+    private readonly robotAssistantRepository: IRobotAssistantRepository
   ) {}
 
   public async getAdminSnapshot(input: {
     currentPath?: string | null;
   }): Promise<RobotAssistantAdminSnapshot> {
-    const dataSource = await getDataSource();
     const now = new Date();
     const twentyFourHoursAgo = new Date(now.getTime() - 1000 * 60 * 60 * 24);
     const fortyEightHoursAgo = new Date(now.getTime() - 1000 * 60 * 60 * 48);
@@ -245,165 +186,17 @@ export class RobotAssistantDataService {
         since: sevenDaysAgo,
         until: now,
       }),
-      dataSource.query(
-        `
-          with recent_routes as (
-            select
-              ${normalizeRoutePathSql("path")} as path,
-              visitor_key
-            from site_visit_events
-            where visited_at >= $1
-          )
-          select
-            path,
-            count(*)::int as hits,
-            count(distinct visitor_key)::int as visitors
-          from recent_routes
-          group by path
-          order by visitors desc, hits desc
-          limit 12
-        `,
-        [sevenDaysAgo.toISOString()]
-      ),
-      dataSource.query(
-        `
-          with ordered_routes as (
-            select
-              visitor_key,
-              visited_at,
-              ${normalizeRoutePathSql("path")} as from_path,
-              lead(${normalizeRoutePathSql("path")}) over (
-                partition by visitor_key
-                order by visited_at asc
-              ) as to_path,
-              lead(visited_at) over (
-                partition by visitor_key
-                order by visited_at asc
-              ) as next_visited_at
-            from site_visit_events
-            where visited_at >= $1
-          )
-          select
-            from_path,
-            to_path,
-            count(*)::int as count
-          from ordered_routes
-          where to_path is not null
-            and from_path != to_path
-            and next_visited_at <= visited_at + interval '30 minutes'
-          group by from_path, to_path
-          order by count desc
-          limit 10
-        `,
-        [sevenDaysAgo.toISOString()]
-      ),
-      dataSource.query(
-        `
-          with ordered_routes as (
-            select
-              visitor_key,
-              visited_at,
-              ${normalizeRoutePathSql("path")} as path,
-              lead(visited_at) over (
-                partition by visitor_key
-                order by visited_at asc
-              ) as next_visited_at
-            from site_visit_events
-            where visited_at >= $1
-          )
-          select
-            path,
-            count(*)::int as exits
-          from ordered_routes
-          where next_visited_at is null
-             or next_visited_at > visited_at + interval '30 minutes'
-          group by path
-          order by exits desc
-          limit 10
-        `,
-        [sevenDaysAgo.toISOString()]
-      ),
-      dataSource.query(
-        `
-          with auth_entries as (
-            select
-              visitor_key,
-              visited_at,
-              ${normalizeRoutePathSql("path")} as path
-            from site_visit_events
-            where visited_at >= $1
-              and path in ('/login', '/register')
-          )
-          select
-            path,
-            count(distinct visitor_key)::int as attempts,
-            count(
-              distinct case
-                when exists (
-                  select 1
-                  from site_visit_events future_routes
-                  where future_routes.visitor_key = auth_entries.visitor_key
-                    and future_routes.visited_at > auth_entries.visited_at
-                    and future_routes.visited_at <= auth_entries.visited_at + interval '30 minutes'
-                    and (
-                      future_routes.path = '/profile'
-                      or future_routes.path like '/admin/%'
-                    )
-                ) then visitor_key
-              end
-            )::int as completions
-          from auth_entries
-          group by path
-          order by attempts desc
-        `,
-        [sevenDaysAgo.toISOString()]
-      ),
-      dataSource.query(
-        `
-          select
-            posts.title,
-            posts.slug,
-            posts.category,
-            posts.reading_time,
-            coalesce(sum(case when events.kind = 'study_view' then 1 else 0 end), 0)::int as views,
-            coalesce(sum(case when events.kind = 'study_like' then 1 else 0 end), 0)::int as likes,
-            coalesce(sum(case when events.kind in ('comment_created', 'comment_reply') then 1 else 0 end), 0)::int as comments
-          from study_posts posts
-          left join interaction_events events on events.study_post_id = posts.id
-            and events.created_at >= $1
-          where posts.status = 'published'
-          group by posts.id
-          order by views desc, likes desc, comments desc, posts.published_at desc nulls last
-          limit 12
-        `,
-        [sevenDaysAgo.toISOString()]
-      ),
-      dataSource.query(
-        `
-          select
-            (select count(*)::int from site_visit_events where visited_at >= $1 and visited_at < $2) as visits,
-            (select count(distinct visitor_key)::int from site_visit_events where visited_at >= $1 and visited_at < $2) as unique_visitors,
-            (select count(*)::int from interaction_events where kind = 'study_view' and created_at >= $1 and created_at < $2) as reads,
-            (select count(*)::int from interaction_events where kind in ('study_like', 'comment_like') and created_at >= $1 and created_at < $2) as likes,
-            (select count(*)::int from interaction_events where kind in ('comment_created', 'comment_reply') and created_at >= $1 and created_at < $2) as comments
-        `,
-        [twentyFourHoursAgo.toISOString(), now.toISOString()]
-      ),
-      dataSource.query(
-        `
-          select
-            (select count(*)::int from site_visit_events where visited_at >= $1 and visited_at < $2) as visits,
-            (select count(distinct visitor_key)::int from site_visit_events where visited_at >= $1 and visited_at < $2) as unique_visitors,
-            (select count(*)::int from interaction_events where kind = 'study_view' and created_at >= $1 and created_at < $2) as reads,
-            (select count(*)::int from interaction_events where kind in ('study_like', 'comment_like') and created_at >= $1 and created_at < $2) as likes,
-            (select count(*)::int from interaction_events where kind in ('comment_created', 'comment_reply') and created_at >= $1 and created_at < $2) as comments
-        `,
-        [fortyEightHoursAgo.toISOString(), twentyFourHoursAgo.toISOString()]
-      ),
+      this.robotAssistantRepository.getRouteUsage(sevenDaysAgo),
+      this.robotAssistantRepository.getRouteTransitions(sevenDaysAgo),
+      this.robotAssistantRepository.getRouteExits(sevenDaysAgo),
+      this.robotAssistantRepository.getAuthFriction(sevenDaysAgo),
+      this.robotAssistantRepository.getContentPerformance(sevenDaysAgo),
+      this.robotAssistantRepository.getWindowMetrics(twentyFourHoursAgo, now),
+      this.robotAssistantRepository.getWindowMetrics(fortyEightHoursAgo, twentyFourHoursAgo),
     ]);
 
     const routeUsage = sortRouteUsage(
-      (routeUsageRows as RouteUsageRow[]).map(
+      routeUsageRows.map(
         (row): RobotAssistantRouteUsage => ({
           hits: toNumber(row.hits),
           path: row.path,
@@ -412,7 +205,7 @@ export class RobotAssistantDataService {
       )
     );
 
-    const routeTransitions = (transitionRows as RouteTransitionRow[]).map(
+    const routeTransitions = transitionRows.map(
       (row): RobotAssistantRouteTransition => ({
         count: toNumber(row.count),
         fromPath: row.from_path,
@@ -420,14 +213,14 @@ export class RobotAssistantDataService {
       })
     );
 
-    const dropOffs = (dropOffRows as RouteExitRow[]).map(
+    const dropOffs = dropOffRows.map(
       (row): RobotAssistantRouteExit => ({
         exits: toNumber(row.exits),
         path: row.path,
       })
     );
 
-    const authFriction = (authFrictionRows as AuthFrictionRow[]).map(
+    const authFriction = authFrictionRows.map(
       (row): RobotAssistantAuthFriction => {
         const attempts = toNumber(row.attempts);
         const completions = toNumber(row.completions);
@@ -441,7 +234,7 @@ export class RobotAssistantDataService {
       }
     );
 
-    const contentPerformance = (contentPerformanceRows as ContentPerformanceRow[]).map(
+    const contentPerformance = contentPerformanceRows.map(
       (row): RobotAssistantContentPerformance => {
         const views = toNumber(row.views);
         const likes = toNumber(row.likes);
@@ -462,26 +255,23 @@ export class RobotAssistantDataService {
     );
 
     const mapWindowComparison = (
-      currentRows: unknown[],
-      previousRows: unknown[]
+      currentRow: RobotAssistantWindowMetricRow | null,
+      previousRow: RobotAssistantWindowMetricRow | null
     ): RobotAssistantWindowComparison => {
-      const currentRow = currentRows[0] as WindowMetricRow | undefined;
-      const previousRow = previousRows[0] as WindowMetricRow | undefined;
-
       return {
         current: {
-          comments: toNumber(currentRow?.comments),
-          likes: toNumber(currentRow?.likes),
-          reads: toNumber(currentRow?.reads),
-          uniqueVisitors: toNumber(currentRow?.unique_visitors),
-          visits: toNumber(currentRow?.visits),
+          comments: toNumber(currentRow?.comments ?? 0),
+          likes: toNumber(currentRow?.likes ?? 0),
+          reads: toNumber(currentRow?.reads ?? 0),
+          uniqueVisitors: toNumber(currentRow?.unique_visitors ?? 0),
+          visits: toNumber(currentRow?.visits ?? 0),
         },
         previous: {
-          comments: toNumber(previousRow?.comments),
-          likes: toNumber(previousRow?.likes),
-          reads: toNumber(previousRow?.reads),
-          uniqueVisitors: toNumber(previousRow?.unique_visitors),
-          visits: toNumber(previousRow?.visits),
+          comments: toNumber(previousRow?.comments ?? 0),
+          likes: toNumber(previousRow?.likes ?? 0),
+          reads: toNumber(previousRow?.reads ?? 0),
+          uniqueVisitors: toNumber(previousRow?.unique_visitors ?? 0),
+          visits: toNumber(previousRow?.visits ?? 0),
         },
       };
     };

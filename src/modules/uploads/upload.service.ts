@@ -1,10 +1,9 @@
 import { inject, injectable } from "tsyringe";
 import { AppError } from "../../core/errors/AppError";
 import { TOKENS } from "../../shared/container/tokens";
-import { CloudflareR2StorageProvider } from "./storage/cloudflare-r2-storage.provider";
 import { getStorageConfig } from "./storage/storage.config";
-import { IStorageProvider } from "./storage/storage.provider.interface";
 import { createUploadKey } from "./storage/storage.utils";
+import { IUploadRepository } from "./upload.repository.interface";
 import { StoredFile, UploadFolder, UploadableFile, UploadedAsset } from "./upload.types";
 
 @injectable()
@@ -18,10 +17,8 @@ export class UploadService {
   }
 
   constructor(
-    @inject(TOKENS.LocalStorageProvider)
-    private readonly localStorage: IStorageProvider,
-    @inject(TOKENS.CloudflareR2StorageProvider)
-    private readonly cloudflareStorage: CloudflareR2StorageProvider
+    @inject(TOKENS.UploadRepository)
+    private readonly repository: IUploadRepository
   ) {}
 
   public async deleteFile(key: string) {
@@ -30,13 +27,13 @@ export class UploadService {
     const providerErrors: unknown[] = [];
 
     try {
-      localDeleted = await this.localStorage.deleteFile(key);
+      localDeleted = await this.repository.deleteLocalFile(key);
     } catch (error) {
       providerErrors.push(error);
     }
 
     try {
-      cloudDeleted = await this.cloudflareStorage.deleteFile(key);
+      cloudDeleted = await this.repository.deleteCloudFile(key);
     } catch (error) {
       console.error("Falha ao remover o arquivo da Cloudflare R2.", this.describeError(error));
       providerErrors.push(error);
@@ -60,7 +57,7 @@ export class UploadService {
   }
 
   public async getFile(key: string): Promise<StoredFile> {
-    const localFile = await this.localStorage.readFile(key);
+    const localFile = await this.repository.readLocalFile(key);
 
     if (localFile) {
       return localFile;
@@ -69,7 +66,7 @@ export class UploadService {
     let cloudFile: StoredFile | null = null;
 
     try {
-      cloudFile = await this.cloudflareStorage.readFile(key);
+      cloudFile = await this.repository.readCloudFile(key);
     } catch (error) {
       console.error("Falha ao ler o arquivo da Cloudflare R2.", this.describeError(error));
       throw new AppError(
@@ -89,10 +86,11 @@ export class UploadService {
   public async uploadFile(file: UploadableFile, folder: UploadFolder): Promise<UploadedAsset> {
     const { allowLocalFallback, preferCloudUpload } = getStorageConfig();
     const { fileName, key } = createUploadKey(folder, file);
+    const isCloudConfigured = this.repository.isCloudConfigured();
 
-    if (preferCloudUpload && this.cloudflareStorage.isConfigured()) {
+    if (preferCloudUpload && isCloudConfigured) {
       try {
-        await this.cloudflareStorage.saveFile(key, file);
+        await this.repository.saveCloudFile(key, file);
 
         return {
           fallbackUsed: false,
@@ -119,10 +117,10 @@ export class UploadService {
       }
     }
 
-    await this.localStorage.saveFile(key, file);
+    await this.repository.saveLocalFile(key, file);
 
     return {
-      fallbackUsed: preferCloudUpload && this.cloudflareStorage.isConfigured(),
+      fallbackUsed: preferCloudUpload && isCloudConfigured,
       fileName,
       folder,
       key,

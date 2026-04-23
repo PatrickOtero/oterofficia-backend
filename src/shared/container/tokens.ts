@@ -8,5 +8,7 @@ export const TOKENS = {
   LocalStorageProvider: "LocalStorageProvider",
   MailService: "MailService",
   ProjectRepository: "ProjectRepository",
+  RobotAssistantRepository: "RobotAssistantRepository",
   StudyRepository: "StudyRepository",
+  UploadRepository: "UploadRepository",
 } as const;
