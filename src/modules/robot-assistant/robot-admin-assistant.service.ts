@@ -16,14 +16,14 @@ const normalizePrompt = (value: string | null | undefined) =>
 const routeLabelMap: Record<string, string> = {
   about: "Sobre mim",
   admin: "painel administrativo",
-  "forgot-password": "recuperacao de senha",
+  "forgot-password": "recuperação de senha",
   home: "menu inicial",
   login: "login",
-  portfolio: "portfolio",
+  portfolio: "portfólio",
   profile: "perfil",
   register: "cadastro",
   "study-post": "leituras individuais",
-  studies: "area de estudos",
+  studies: "área de estudos",
 };
 
 const describeRoute = (path: string) => routeLabelMap[path] ?? path;
@@ -36,7 +36,7 @@ const buildAdminActions = (): RobotAssistantAction[] => [
   {
     id: "admin-content-highlight",
     kind: "prompt",
-    label: "Conteudo em destaque",
+    label: "Conteúdo em destaque",
     prompt: "Qual conteúdo está performando melhor?",
   },
   {
@@ -145,16 +145,16 @@ export class RobotAdminAssistantService {
     )[0];
 
     const summary = mainRoute
-      ? `Hoje ${describeRoute(mainRoute.path)} concentrou a maior parte do interesse, com ${mainRoute.visitors} visitantes distintos circulando por essa area.`
-      : `Hoje o radar ainda esta com pouco volume para cravar um eixo dominante de navegacao.`;
+      ? `Hoje ${describeRoute(mainRoute.path)} concentrou a maior parte do interesse, com ${mainRoute.visitors} visitantes distintos circulando por essa área.`
+      : "Hoje o radar ainda está com pouco volume para cravar um eixo dominante de navegação.";
     const insight = weakestFriction && weakestFriction.attempts > 0
-      ? `${describeRoute(weakestFriction.path)} continua sendo o ponto mais sensivel do fluxo, com conversao estimada em ${toPercent(weakestFriction.completionRate)}. ${bestContent ? `Ao mesmo tempo, "${bestContent.title}" e o conteudo mais qualificado do momento.` : ""}`
+      ? `${describeRoute(weakestFriction.path)} continua sendo o ponto mais sensível do fluxo, com conversão estimada em ${toPercent(weakestFriction.completionRate)}. ${bestContent ? `Ao mesmo tempo, "${bestContent.title}" é o conteúdo mais qualificado do momento.` : ""}`
       : bestContent
-        ? `"${bestContent.title}" esta puxando a leitura mais qualificada agora, enquanto ${leastExploredRoute ? describeRoute(leastExploredRoute.path) : "outras areas do site"} segue abaixo do potencial.`
-        : `O comportamento geral ainda esta mais espalhado do que concentrado em um fluxo claro.`;
+        ? `"${bestContent.title}" está puxando a leitura mais qualificada agora, enquanto ${leastExploredRoute ? describeRoute(leastExploredRoute.path) : "outras áreas do site"} segue abaixo do potencial.`
+        : "O comportamento geral ainda está mais espalhado do que concentrado em um fluxo claro.";
     const recommendation = weakestFriction && weakestFriction.attempts > 0
-      ? `Minha recomendacao pratica e reduzir a friccao entre ${describeRoute(mainRoute?.path || "o conteudo")} e ${describeRoute(weakestFriction.path)}, porque e ali que parte da atencao esta se perdendo.`
-      : `Minha recomendacao pratica e empurrar mais trafego qualificado para ${leastExploredRoute ? describeRoute(leastExploredRoute.path) : "as areas menos exploradas"}, usando o melhor conteudo atual como ponte.`;
+      ? `Minha recomendação prática é reduzir a fricção entre ${describeRoute(mainRoute?.path || "o conteúdo")} e ${describeRoute(weakestFriction.path)}, porque é ali que parte da atenção está se perdendo.`
+      : `Minha recomendação prática é empurrar mais tráfego qualificado para ${leastExploredRoute ? describeRoute(leastExploredRoute.path) : "as áreas menos exploradas"}, usando o melhor conteúdo atual como ponte.`;
 
     return `${summary}\n\n${insight}\n\n${recommendation}`;
   }
@@ -169,15 +169,15 @@ export class RobotAdminAssistantService {
     const mainRoute = findMainRoute(snapshot.routeUsage);
     const anomalyTone =
       visitorDelta < -0.18 || readsDelta < -0.18
-        ? "O movimento caiu em relacao ao bloco anterior."
+        ? "O movimento caiu em relação ao bloco anterior."
         : visitorDelta > 0.18 || readsDelta > 0.18
-          ? "O movimento acelerou em relacao ao bloco anterior."
-          : "O movimento ficou relativamente estavel em relacao ao bloco anterior.";
-    const summary = `Nas ultimas 24 horas, o site recebeu ${comparison.current.uniqueVisitors} visitantes unicos e gerou ${comparison.current.reads} leituras registradas. ${anomalyTone}`;
+          ? "O movimento acelerou em relação ao bloco anterior."
+          : "O movimento ficou relativamente estável em relação ao bloco anterior.";
+    const summary = `Nas últimas 24 horas, o site recebeu ${comparison.current.uniqueVisitors} visitantes únicos e gerou ${comparison.current.reads} leituras registradas. ${anomalyTone}`;
     const insight = mainRoute
-      ? `${describeRoute(mainRoute.path)} segue como principal porta de interesse, enquanto ${comparison.current.likes} interacoes de afinidade e ${comparison.current.comments} comentarios ajudam a separar leitura superficial de interesse real.`
-      : `Ainda nao apareceu um fluxo forte o suficiente para dominar a navegacao do dia.`;
-    const recommendation = `Minha recomendacao pratica e observar de perto ${snapshot.authFriction[0] ? describeRoute(snapshot.authFriction[0].path) : "o fluxo de entrada"} nas proximas horas e usar ${mainRoute ? describeRoute(mainRoute.path) : "a area mais visitada"} como alavanca para o restante do site.`;
+      ? `${describeRoute(mainRoute.path)} segue como principal porta de interesse, enquanto ${comparison.current.likes} interações de afinidade e ${comparison.current.comments} comentários ajudam a separar leitura superficial de interesse real.`
+      : "Ainda não apareceu um fluxo forte o suficiente para dominar a navegação do dia.";
+    const recommendation = `Minha recomendação prática é observar de perto ${snapshot.authFriction[0] ? describeRoute(snapshot.authFriction[0].path) : "o fluxo de entrada"} nas próximas horas e usar ${mainRoute ? describeRoute(mainRoute.path) : "a área mais visitada"} como alavanca para o restante do site.`;
 
     return `${summary}\n\n${insight}\n\n${recommendation}`;
   }
@@ -188,11 +188,11 @@ export class RobotAdminAssistantService {
     const bestContent = [...snapshot.contentPerformance].sort(
       (left, right) => right.engagementScore - left.engagementScore
     )[0];
-    const summary = `Na ultima semana, o site acumulou ${snapshot.visitorSummary7d.visitorsSince} visitantes distintos em ${snapshot.visitorSummary7d.entriesSince} entradas rastreadas.`;
+    const summary = `Na última semana, o site acumulou ${snapshot.visitorSummary7d.visitorsSince} visitantes distintos em ${snapshot.visitorSummary7d.entriesSince} entradas rastreadas.`;
     const insight = topTransition
-      ? `O caminho mais repetido foi de ${describeRoute(topTransition.fromPath)} para ${describeRoute(topTransition.toPath)}, o que indica um eixo de navegacao mais forte do que o restante. ${bestContent ? `"${bestContent.title}" aparece como a melhor ancora de retencao desse periodo.` : ""}`
-      : `${bestContent ? `"${bestContent.title}" lidera a retencao do periodo, mas o restante dos fluxos ainda esta pulverizado.` : "Ainda falta densidade para identificar um fluxo dominante com seguranca."}`;
-    const recommendation = `Minha recomendacao pratica e reforcar a passagem para ${leastExploredRoute ? describeRoute(leastExploredRoute.path) : "as areas menos exploradas"}, porque hoje ela esta ficando fora da trilha principal dos usuarios.`;
+      ? `O caminho mais repetido foi de ${describeRoute(topTransition.fromPath)} para ${describeRoute(topTransition.toPath)}, o que indica um eixo de navegação mais forte do que o restante. ${bestContent ? `"${bestContent.title}" aparece como a melhor âncora de retenção desse período.` : ""}`
+      : `${bestContent ? `"${bestContent.title}" lidera a retenção do período, mas o restante dos fluxos ainda está pulverizado.` : "Ainda falta densidade para identificar um fluxo dominante com segurança."}`;
+    const recommendation = `Minha recomendação prática é reforçar a passagem para ${leastExploredRoute ? describeRoute(leastExploredRoute.path) : "as áreas menos exploradas"}, porque hoje ela está ficando fora da trilha principal dos usuários.`;
 
     return `${summary}\n\n${insight}\n\n${recommendation}`;
   }
@@ -203,12 +203,12 @@ export class RobotAdminAssistantService {
     )[0];
     const mainDropOff = snapshot.dropOffs[0];
     const summary = weakestFriction
-      ? `${describeRoute(weakestFriction.path)} e o ponto mais sensivel do fluxo hoje, com ${weakestFriction.attempts} tentativas rastreadas e conversao estimada em ${toPercent(weakestFriction.completionRate)}.`
-      : `Ainda nao houve volume suficiente em login ou cadastro para medir friccao de forma confiavel.`;
+      ? `${describeRoute(weakestFriction.path)} é o ponto mais sensível do fluxo hoje, com ${weakestFriction.attempts} tentativas rastreadas e conversão estimada em ${toPercent(weakestFriction.completionRate)}.`
+      : "Ainda não houve volume suficiente em login ou cadastro para medir fricção de forma confiável.";
     const insight = mainDropOff
-      ? `${describeRoute(mainDropOff.path)} tambem aparece como uma das principais saidas de sessao, o que sugere quebra entre curiosidade e continuidade.`
-      : `O gargalo principal continua concentrado na entrada, nao no restante da navegacao.`;
-    const recommendation = `Minha recomendacao pratica e simplificar o salto entre leitura e autenticacao, especialmente se o usuario vier de estudos ou de um post individual.`;
+      ? `${describeRoute(mainDropOff.path)} também aparece como uma das principais saídas de sessão, o que sugere quebra entre curiosidade e continuidade.`
+      : "O gargalo principal continua concentrado na entrada, não no restante da navegação.";
+    const recommendation = "Minha recomendação prática é simplificar o salto entre leitura e autenticação, especialmente se o usuário vier de estudos ou de um post individual.";
 
     return `${summary}\n\n${insight}\n\n${recommendation}`;
   }
@@ -220,14 +220,14 @@ export class RobotAdminAssistantService {
     const secondContent = [...snapshot.contentPerformance]
       .sort((left, right) => right.engagementScore - left.engagementScore)[1];
     const summary = bestContent
-      ? `"${bestContent.title}" e o conteudo mais forte agora, combinando ${bestContent.views} leituras com um indice de resposta acima da media.`
-      : `Ainda nao existe conteudo com sinal suficiente para destacar como lider.`;
+      ? `"${bestContent.title}" é o conteúdo mais forte agora, combinando ${bestContent.views} leituras com um índice de resposta acima da média.`
+      : "Ainda não existe conteúdo com sinal suficiente para destacar como líder.";
     const insight = secondContent
-      ? `"${secondContent.title}" aparece logo atras, mas com intensidade menor, o que mostra que o interesse ainda esta concentrado em poucos estudos.`
-      : `O consumo ainda esta concentrado em um conjunto pequeno de leituras.`;
+      ? `"${secondContent.title}" aparece logo atrás, mas com intensidade menor, o que mostra que o interesse ainda está concentrado em poucos estudos.`
+      : "O consumo ainda está concentrado em um conjunto pequeno de leituras.";
     const recommendation = bestContent
-      ? `Minha recomendacao pratica e usar "${bestContent.title}" como ponte para outros estudos da mesma categoria e puxar o usuario dali para cadastro, portfolio ou contato.`
-      : `Minha recomendacao pratica e fortalecer a distribuicao das leituras com melhor taxa de resposta antes de ampliar o volume de conteudo.`;
+      ? `Minha recomendação prática é usar "${bestContent.title}" como ponte para outros estudos da mesma categoria e puxar o usuário dali para cadastro, portfólio ou contato.`
+      : "Minha recomendação prática é fortalecer a distribuição das leituras com melhor taxa de resposta antes de ampliar o volume de conteúdo.";
 
     return `${summary}\n\n${insight}\n\n${recommendation}`;
   }
@@ -237,12 +237,12 @@ export class RobotAdminAssistantService {
     const topTransition = snapshot.routeTransitions[0];
     const mainDropOff = snapshot.dropOffs[0];
     const summary = mainRoute
-      ? `${describeRoute(mainRoute.path)} e hoje o ponto de entrada mais forte do site.`
-      : `Ainda nao apareceu um ponto de entrada dominante na navegacao recente.`;
+      ? `${describeRoute(mainRoute.path)} é hoje o ponto de entrada mais forte do site.`
+      : "Ainda não apareceu um ponto de entrada dominante na navegação recente.";
     const insight = topTransition
-      ? `O caminho mais usado foi de ${describeRoute(topTransition.fromPath)} para ${describeRoute(topTransition.toPath)}, enquanto ${mainDropOff ? describeRoute(mainDropOff.path) : "alguns trechos"} concentram as principais saidas.`
-      : `A navegacao esta mais fragmentada do que encadeada, com poucos caminhos repetidos.`;
-    const recommendation = `Minha recomendacao pratica e reforcar as transicoes entre as areas que ja recebem atencao e as paginas menos visitadas, em vez de tentar criar novos caminhos do zero.`;
+      ? `O caminho mais usado foi de ${describeRoute(topTransition.fromPath)} para ${describeRoute(topTransition.toPath)}, enquanto ${mainDropOff ? describeRoute(mainDropOff.path) : "alguns trechos"} concentram as principais saídas.`
+      : "A navegação está mais fragmentada do que encadeada, com poucos caminhos repetidos.";
+    const recommendation = "Minha recomendação prática é reforçar as transições entre as áreas que já recebem atenção e as páginas menos visitadas, em vez de tentar criar novos caminhos do zero.";
 
     return `${summary}\n\n${insight}\n\n${recommendation}`;
   }
@@ -251,10 +251,10 @@ export class RobotAdminAssistantService {
     const mostEngagedUser = snapshot.analytics.topUsers[0];
     const topReader = snapshot.analytics.topReaders[0];
     const summary = mostEngagedUser
-      ? `${mostEngagedUser.name} lidera a interacao recente, enquanto ${topReader ? topReader.name : "os leitores mais ativos"} sustenta o consumo de conteudo.`
-      : `Ainda nao ha densidade suficiente para destacar um padrao forte de comportamento por usuario.`;
-    const insight = `No mix atual, leituras representam ${snapshot.analytics.overview.totalReads} eventos acumulados, mas a distancia entre leitura e resposta ainda e o principal filtro de qualidade.`;
-    const recommendation = `Minha recomendacao pratica e observar quem le muito mas quase nao avanca para comentario, curtida ou contato, porque e ali que pode existir interesse sem conversao.`;
+      ? `${mostEngagedUser.name} lidera a interação recente, enquanto ${topReader ? topReader.name : "os leitores mais ativos"} sustenta o consumo de conteúdo.`
+      : "Ainda não há densidade suficiente para destacar um padrão forte de comportamento por usuário.";
+    const insight = `No mix atual, leituras representam ${snapshot.analytics.overview.totalReads} eventos acumulados, mas a distância entre leitura e resposta ainda é o principal filtro de qualidade.`;
+    const recommendation = "Minha recomendação prática é observar quem lê muito mas quase não avança para comentário, curtida ou contato, porque é ali que pode existir interesse sem conversão.";
 
     return `${summary}\n\n${insight}\n\n${recommendation}`;
   }
@@ -271,13 +271,13 @@ export class RobotAdminAssistantService {
     )[0];
 
     if (visitorDelta < -0.25 || readsDelta < -0.25) {
-      return `O movimento saiu do padrao nas ultimas 24 horas, com queda perceptivel de visitas ou leituras em relacao ao bloco anterior.\n\nO principal insight e que o consumo caiu antes de virar interacao, entao o problema parece estar mais na entrada ou na descoberta do que no conteudo em si.\n\nMinha recomendacao pratica e revisar imediatamente os caminhos que levam para estudos, login e cadastro, porque qualquer friccao ali agora esta custando atencao real.`;
+      return `O movimento saiu do padrão nas últimas 24 horas, com queda perceptível de visitas ou leituras em relação ao bloco anterior.\n\nO principal insight é que o consumo caiu antes de virar interação, então o problema parece estar mais na entrada ou na descoberta do que no conteúdo em si.\n\nMinha recomendação prática é revisar imediatamente os caminhos que levam para estudos, login e cadastro, porque qualquer fricção ali agora está custando atenção real.`;
     }
 
     if (weakestFriction && weakestFriction.attempts > 0 && weakestFriction.completionRate < 0.35) {
-      return `O que mais merece atencao agora e o atrito no ${describeRoute(weakestFriction.path)}.\n\nO principal insight e que o conteudo esta conseguindo puxar interesse, mas parte da energia morre antes da autenticacao se completar.\n\nMinha recomendacao pratica e simplificar esse fluxo antes de mexer no resto, porque ele esta segurando a conversao do que ja funciona.`;
+      return `O que mais merece atenção agora é o atrito no ${describeRoute(weakestFriction.path)}.\n\nO principal insight é que o conteúdo está conseguindo puxar interesse, mas parte da energia morre antes da autenticação se completar.\n\nMinha recomendação prática é simplificar esse fluxo antes de mexer no resto, porque ele está segurando a conversão do que já funciona.`;
     }
 
-    return `Nao apareceu nenhuma anomalia grave fora do padrao recente.\n\nO principal insight e que o site esta concentrando valor em poucas leituras fortes, enquanto algumas areas seguem subexploradas.\n\nMinha recomendacao pratica e usar o melhor conteudo atual para redistribuir atencao e testar transicoes mais fortes para portfolio, sobre mim e autenticacao.`;
+    return `Não apareceu nenhuma anomalia grave fora do padrão recente.\n\nO principal insight é que o site está concentrando valor em poucas leituras fortes, enquanto algumas áreas seguem subexploradas.\n\nMinha recomendação prática é usar o melhor conteúdo atual para redistribuir atenção e testar transições mais fortes para portfólio, sobre mim e autenticação.`;
   }
 }

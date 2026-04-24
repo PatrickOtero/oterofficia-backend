@@ -27,7 +27,7 @@ export class CommentService {
     let parentCommentOwnerId: string | null = null;
 
     if (!post || post.status !== "published") {
-      throw new AppError("Nao foi possivel comentar neste estudo.", 404, "study_not_found");
+      throw new AppError("Não foi possível comentar neste estudo.", 404, "study_not_found");
     }
 
     if (parentCommentId) {
@@ -35,7 +35,7 @@ export class CommentService {
 
       if (!parentComment || parentComment.post_id !== postId) {
         throw new AppError(
-          "Nao foi possivel responder a este comentario.",
+          "Não foi possível responder a este comentário.",
           404,
           "parent_comment_not_found"
         );
@@ -56,7 +56,7 @@ export class CommentService {
     );
 
     if (!createdComment) {
-      throw new AppError("Nao foi possivel publicar o comentario.", 500, "comment_creation_failed");
+      throw new AppError("Não foi possível publicar o comentário.", 500, "comment_creation_failed");
     }
 
     const commentsCount = await this.studies.countCommentsByPostId(postId);
@@ -78,14 +78,14 @@ export class CommentService {
     const existingComment = await this.comments.findCommentPermissionData(commentId);
 
     if (!existingComment) {
-      throw new AppError("Comentario nao encontrado.", 404, "comment_not_found");
+      throw new AppError("Comentário não encontrado.", 404, "comment_not_found");
     }
 
     const isOwner = existingComment.user_id === user.id;
     const isAdmin = user.role === "admin";
 
     if (!isOwner && !isAdmin) {
-      throw new AppError("Voce nao pode remover este comentario.", 403, "comment_delete_forbidden");
+      throw new AppError("Você não pode remover este comentário.", 403, "comment_delete_forbidden");
     }
 
     await this.comments.deleteComment(commentId);
@@ -129,7 +129,7 @@ export class CommentService {
     const post = await this.studies.findById(postId);
 
     if (!post || post.status !== "published") {
-      throw new AppError("Estudo nao encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo não encontrado.", 404, "study_not_found");
     }
 
     return this.comments.listCommentsByPostId(postId, user?.id, user?.role);
@@ -143,7 +143,7 @@ export class CommentService {
     const existingComment = await this.comments.findCommentPermissionData(commentId);
 
     if (!existingComment) {
-      throw new AppError("Comentario nao encontrado.", 404, "comment_not_found");
+      throw new AppError("Comentário não encontrado.", 404, "comment_not_found");
     }
 
     const alreadyLiked = await this.comments.findLike(commentId, user.id);
@@ -170,7 +170,7 @@ export class CommentService {
 
     if (!updatedComment) {
       throw new AppError(
-        "Nao foi possivel atualizar a curtida do comentario.",
+        "Não foi possível atualizar a curtida do comentário.",
         500,
         "comment_like_update_failed"
       );

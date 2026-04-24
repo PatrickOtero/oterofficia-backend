@@ -15,7 +15,7 @@ export class LocalStorageProvider implements IStorageProvider {
     const storagePath = resolve(this.uploadsRoot, normalizedKey);
 
     if (!storagePath.startsWith(this.uploadsRoot)) {
-      throw new Error("Tentativa de acessar um caminho de upload invalido.");
+      throw new Error("Tentativa de acessar um caminho de upload inválido.");
     }
 
     return storagePath;

@@ -80,7 +80,7 @@ export class AuthService {
     const actionToken = await this.repository.findActionTokenByHash(type, hashActionToken(token));
 
     if (!actionToken || actionToken.consumedAt) {
-      throw new AppError("O link informado nao e mais valido.", 400, "invalid_action_token");
+      throw new AppError("O link informado não é mais válido.", 400, "invalid_action_token");
     }
 
     if (new Date(actionToken.expiresAt).getTime() <= Date.now()) {
@@ -105,7 +105,7 @@ export class AuthService {
         actionLabel: input.actionLabel,
         actionUrl: `${appUrl}${input.actionPath}`,
         intro: input.intro,
-        outro: "Se voce nao solicitou esta operacao, ignore este e-mail.",
+        outro: "Se você não solicitou esta operação, ignore este e-mail.",
         title: input.title,
       },
       from: resolveSenderAddress(),
@@ -174,7 +174,7 @@ export class AuthService {
     const user = await this.repository.getUserProfileById(userId);
 
     if (!user) {
-      throw new AppError("Usuario nao encontrado.", 404, "user_not_found");
+      throw new AppError("Usuário não encontrado.", 404, "user_not_found");
     }
 
     return user;
@@ -184,7 +184,7 @@ export class AuthService {
     let user = await this.repository.findUserByEmail(input.email);
 
     if (!user || !verifyPassword(input.password, user.passwordHash)) {
-      throw new AppError("E-mail ou senha invalidos.", 401, "invalid_credentials");
+      throw new AppError("E-mail ou senha inválidos.", 401, "invalid_credentials");
     }
 
     if (!user.emailVerifiedAt) {
@@ -226,7 +226,7 @@ export class AuthService {
     const existingUser = await this.repository.findUserByEmail(input.email);
 
     if (existingUser) {
-      throw new AppError("Ja existe um usuario cadastrado com este e-mail.", 409, "email_in_use");
+      throw new AppError("Já existe um usuário cadastrado com este e-mail.", 409, "email_in_use");
     }
 
     const createdUser = await this.repository.createUser({
@@ -239,7 +239,7 @@ export class AuthService {
     });
 
     if (!createdUser) {
-      throw new AppError("Nao foi possivel criar o usuario.", 500, "user_creation_failed");
+      throw new AppError("Não foi possível criar o usuário.", 500, "user_creation_failed");
     }
 
     if (!createdUser.emailVerifiedAt) {
@@ -272,11 +272,11 @@ export class AuthService {
     const user = await this.repository.findUserByEmail(email);
 
     if (!user) {
-      return { message: "Se existir uma conta com este e-mail, uma nova confirmacao sera enviada." };
+      return { message: "Se existir uma conta com este e-mail, uma nova confirmação será enviada." };
     }
 
     if (user.emailVerifiedAt) {
-      return { message: "Este e-mail ja esta confirmado." };
+      return { message: "Este e-mail já está confirmado." };
     }
 
     const token = await this.createUserActionToken(user.id, "verify_email", null, 24);
@@ -286,11 +286,11 @@ export class AuthService {
       actionPath: `/verify-email?token=${encodeURIComponent(token)}`,
       intro: "Recebemos um novo pedido para confirmar o seu e-mail no Oterofficia.",
       subject: "Confirme o seu cadastro no Oterofficia",
-      title: "Confirmacao de e-mail",
+      title: "Confirmação de e-mail",
       to: user.email,
     });
 
-    return { message: "Enviamos um novo e-mail de confirmacao." };
+    return { message: "Enviamos um novo e-mail de confirmação." };
   }
 
   public async verifyEmail(token: string) {
@@ -298,7 +298,7 @@ export class AuthService {
     const user = await this.repository.findUserById(actionToken.userId);
 
     if (!user) {
-      throw new AppError("Usuario nao encontrado.", 404, "user_not_found");
+      throw new AppError("Usuário não encontrado.", 404, "user_not_found");
     }
 
     await this.repository.updateUser({
@@ -314,7 +314,7 @@ export class AuthService {
     const user = await this.repository.findUserByEmail(email);
 
     if (!user) {
-      return { message: "Se existir uma conta com este e-mail, enviaremos as instrucoes de redefinicao." };
+      return { message: "Se existir uma conta com este e-mail, enviaremos as instruções de redefinição." };
     }
 
     const token = await this.createUserActionToken(user.id, "reset_password", null, 2);
@@ -322,13 +322,13 @@ export class AuthService {
     await this.sendActionEmail({
       actionLabel: "Redefinir senha",
       actionPath: `/reset-password?token=${encodeURIComponent(token)}`,
-      intro: "Voce solicitou a redefinicao da senha da sua conta no Oterofficia.",
-      subject: "Redefinicao de senha no Oterofficia",
+      intro: "Você solicitou a redefinição da senha da sua conta no Oterofficia.",
+      subject: "Redefinição de senha no Oterofficia",
       title: "Redefina a sua senha",
       to: user.email,
     });
 
-    return { message: "Se existir uma conta com este e-mail, enviaremos as instrucoes de redefinicao." };
+    return { message: "Se existir uma conta com este e-mail, enviaremos as instruções de redefinição." };
   }
 
   public async resetPassword(token: string, password: string) {
@@ -336,7 +336,7 @@ export class AuthService {
     const user = await this.repository.findUserById(actionToken.userId);
 
     if (!user) {
-      throw new AppError("Usuario nao encontrado.", 404, "user_not_found");
+      throw new AppError("Usuário não encontrado.", 404, "user_not_found");
     }
 
     await this.repository.updateUser({
@@ -355,7 +355,7 @@ export class AuthService {
     const existingUser = await this.repository.findUserById(userId);
 
     if (!existingUser) {
-      throw new AppError("Usuario nao encontrado.", 404, "user_not_found");
+      throw new AppError("Usuário não encontrado.", 404, "user_not_found");
     }
 
     const updatedUser = await this.repository.updateUser({
@@ -366,7 +366,7 @@ export class AuthService {
     });
 
     if (!updatedUser) {
-      throw new AppError("Nao foi possivel atualizar o perfil.", 500, "profile_update_failed");
+      throw new AppError("Não foi possível atualizar o perfil.", 500, "profile_update_failed");
     }
 
     return {
@@ -379,7 +379,7 @@ export class AuthService {
     const user = await this.repository.findUserById(userId);
 
     if (!user) {
-      throw new AppError("Usuario nao encontrado.", 404, "user_not_found");
+      throw new AppError("Usuário não encontrado.", 404, "user_not_found");
     }
 
     const uploadedAvatar = await this.uploadService.uploadFile(file, "avatars");
@@ -401,11 +401,11 @@ export class AuthService {
     const user = await this.repository.findUserById(userId);
 
     if (!user) {
-      throw new AppError("Usuario nao encontrado.", 404, "user_not_found");
+      throw new AppError("Usuário não encontrado.", 404, "user_not_found");
     }
 
     if (!verifyPassword(input.currentPassword, user.passwordHash)) {
-      throw new AppError("A senha atual esta incorreta.", 401, "invalid_current_password");
+      throw new AppError("A senha atual está incorreta.", 401, "invalid_current_password");
     }
 
     await this.repository.updateUser({
@@ -420,7 +420,7 @@ export class AuthService {
     const user = await this.repository.findUserById(userId);
 
     if (!user) {
-      throw new AppError("Usuario nao encontrado.", 404, "user_not_found");
+      throw new AppError("Usuário não encontrado.", 404, "user_not_found");
     }
 
     if (user.email.toLowerCase() === nextEmail.toLowerCase()) {
@@ -430,7 +430,7 @@ export class AuthService {
     const existingUser = await this.repository.findUserByEmail(nextEmail);
 
     if (existingUser && existingUser.id !== userId) {
-      throw new AppError("Ja existe uma conta usando este e-mail.", 409, "email_in_use");
+      throw new AppError("Já existe uma conta usando este e-mail.", 409, "email_in_use");
     }
 
     const token = await this.createUserActionToken(
@@ -445,11 +445,11 @@ export class AuthService {
       actionPath: `/confirm-email-change?token=${encodeURIComponent(token)}`,
       intro: "Confirme este link para concluir a troca do seu e-mail de acesso.",
       subject: "Confirme a troca do seu e-mail",
-      title: "Confirmacao de novo e-mail",
+      title: "Confirmação de novo e-mail",
       to: nextEmail,
     });
 
-    return { message: "Enviamos a confirmacao para o novo e-mail informado." };
+    return { message: "Enviamos a confirmação para o novo e-mail informado." };
   }
 
   public async confirmEmailChange(token: string) {
@@ -457,13 +457,13 @@ export class AuthService {
     const nextEmail = String(actionToken.payload?.nextEmail || "").trim().toLowerCase();
 
     if (!nextEmail) {
-      throw new AppError("Nao foi possivel identificar o novo e-mail.", 400, "invalid_action_payload");
+      throw new AppError("Não foi possível identificar o novo e-mail.", 400, "invalid_action_payload");
     }
 
     const existingUser = await this.repository.findUserByEmail(nextEmail);
 
     if (existingUser && existingUser.id !== actionToken.userId) {
-      throw new AppError("Este e-mail ja esta em uso por outra conta.", 409, "email_in_use");
+      throw new AppError("Este e-mail já está em uso por outra conta.", 409, "email_in_use");
     }
 
     await this.repository.updateUser({
@@ -480,25 +480,25 @@ export class AuthService {
     const user = await this.repository.findUserById(userId);
 
     if (!user) {
-      throw new AppError("Usuario nao encontrado.", 404, "user_not_found");
+      throw new AppError("Usuário não encontrado.", 404, "user_not_found");
     }
 
     if (!verifyPassword(password, user.passwordHash)) {
-      throw new AppError("A senha atual esta incorreta.", 401, "invalid_current_password");
+      throw new AppError("A senha atual está incorreta.", 401, "invalid_current_password");
     }
 
     const token = await this.createUserActionToken(user.id, "confirm_account_deletion", null, 2);
 
     await this.sendActionEmail({
-      actionLabel: "Confirmar exclusao da conta",
+      actionLabel: "Confirmar exclusão da conta",
       actionPath: `/confirm-account-deletion?token=${encodeURIComponent(token)}`,
       intro: "Recebemos um pedido para excluir permanentemente a sua conta do Oterofficia.",
-      subject: "Confirme a exclusao da sua conta",
-      title: "Exclusao de conta",
+      subject: "Confirme a exclusão da sua conta",
+      title: "Exclusão de conta",
       to: user.email,
     });
 
-    return { message: "Enviamos um e-mail para confirmar a exclusao da conta." };
+    return { message: "Enviamos um e-mail para confirmar a exclusão da conta." };
   }
 
   public async confirmAccountDeletion(token: string) {
@@ -506,13 +506,13 @@ export class AuthService {
     const user = await this.repository.findUserById(actionToken.userId);
 
     if (!user) {
-      throw new AppError("Usuario nao encontrado.", 404, "user_not_found");
+      throw new AppError("Usuário não encontrado.", 404, "user_not_found");
     }
 
     await this.repository.markActionTokenConsumed(actionToken.id);
     await this.repository.deleteUser(user.id);
 
-    return { message: "Conta excluida com sucesso." };
+    return { message: "Conta excluída com sucesso." };
   }
 
   public async resolveSession(token: string) {

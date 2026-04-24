@@ -109,10 +109,10 @@ const mapUserAggregateRow = (row: UserAggregateRow): InteractionAnalyticsUserRow
 });
 
 const interactionMixLabelMap: Record<EngagementInteractionKind, string> = {
-  comment_created: "Comentarios",
-  comment_like: "Curtidas em comentarios",
+  comment_created: "Comentários",
+  comment_like: "Curtidas em comentários",
   comment_reply: "Respostas",
-  study_like: "Curtidas em publicacoes",
+  study_like: "Curtidas em publicações",
   study_view: "Leituras",
 };
 
@@ -237,7 +237,7 @@ export class EngagementRepository implements IEngagementRepository {
             events.id,
             events.kind,
             events.created_at,
-            coalesce(users.name, 'Usuario removido') as actor_name,
+            coalesce(users.name, 'Usuário removido') as actor_name,
             coalesce(users.role, 'user') as actor_role,
             posts.title as post_title
           from interaction_events events

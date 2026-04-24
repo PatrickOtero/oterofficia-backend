@@ -19,15 +19,15 @@ const validateUploadKey = (key: string) => {
   const [folder, fileName, ...remainingParts] = normalizeUploadKey(key).split("/");
 
   if (!folder || !fileName || remainingParts.length > 0) {
-    throw new AppError("Arquivo invalido.", 400, "invalid_upload_key");
+    throw new AppError("Arquivo inválido.", 400, "invalid_upload_key");
   }
 
   if (!UPLOAD_FOLDERS.includes(folder as UploadFolder)) {
-    throw new AppError("Pasta de upload invalida.", 400, "invalid_upload_folder");
+    throw new AppError("Pasta de upload inválida.", 400, "invalid_upload_folder");
   }
 
   if (!SAFE_FILE_NAME_PATTERN.test(fileName)) {
-    throw new AppError("Nome do arquivo invalido.", 400, "invalid_upload_key");
+    throw new AppError("Nome do arquivo inválido.", 400, "invalid_upload_key");
   }
 
   return `${folder}/${fileName}`;
@@ -37,7 +37,7 @@ export const parseUploadFolder = (value: unknown): UploadFolder => {
   const folder = readRequiredString(value, "Pasta de upload");
 
   if (!UPLOAD_FOLDERS.includes(folder as UploadFolder)) {
-    throw new AppError("Pasta de upload invalida.", 400, "invalid_upload_folder");
+    throw new AppError("Pasta de upload inválida.", 400, "invalid_upload_folder");
   }
 
   return folder as UploadFolder;
@@ -49,11 +49,11 @@ export const parseUploadFile = (file?: Express.Multer.File): UploadableFile => {
   }
 
   if (!ALLOWED_IMAGE_MIME_TYPES.has(file.mimetype)) {
-    throw new AppError("Apenas imagens sao aceitas para upload.", 400, "invalid_upload_file_type");
+    throw new AppError("Apenas imagens são aceitas para upload.", 400, "invalid_upload_file_type");
   }
 
   if (!file.buffer.length) {
-    throw new AppError("O arquivo enviado esta vazio.", 400, "empty_upload_file");
+    throw new AppError("O arquivo enviado está vazio.", 400, "empty_upload_file");
   }
 
   return {
@@ -89,7 +89,7 @@ export const parseUploadKeyReference = (value: unknown) => {
     const uploadsIndex = parsedUrl.pathname.indexOf(uploadsPrefix);
 
     if (uploadsIndex < 0) {
-      throw new AppError("Arquivo invalido.", 400, "invalid_upload_key");
+      throw new AppError("Arquivo inválido.", 400, "invalid_upload_key");
     }
 
     return validateUploadKey(decodeURIComponent(parsedUrl.pathname.slice(uploadsIndex + uploadsPrefix.length)));

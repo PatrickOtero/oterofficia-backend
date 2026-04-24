@@ -88,7 +88,7 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
       message:
         error.code === "LIMIT_FILE_SIZE"
           ? "O arquivo ultrapassa o limite permitido para upload."
-          : "Nao foi possivel processar o arquivo enviado.",
+          : "Não foi possível processar o arquivo enviado.",
       requestId,
     });
   }
@@ -112,7 +112,7 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
             reason: fallbackError.message,
           }
         : undefined,
-    message: "O servidor nao conseguiu concluir a solicitacao.",
+    message: "O servidor não conseguiu concluir a solicitação.",
     requestId,
   });
 };

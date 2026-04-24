@@ -50,7 +50,7 @@ export class EngagementService {
     const wasUpdated = await this.repository.markNotificationRead(notificationId, recipientUserId);
 
     if (!wasUpdated) {
-      throw new AppError("Notificacao nao encontrada.", 404, "notification_not_found");
+      throw new AppError("Notificação não encontrada.", 404, "notification_not_found");
     }
 
     return this.repository.listNotificationFeed(recipientUserId);
@@ -72,7 +72,7 @@ export class EngagementService {
     await this.repository.createNotifications(
       adminRecipients.map((recipient) => ({
         actorUserId: actor.id,
-        body: `${actor.name} curtiu a publicacao "${study.title}".`,
+        body: `${actor.name} curtiu a publicação "${study.title}".`,
         kind: "admin-study-like",
         metadata: {
           actorRole: actor.role,
@@ -82,7 +82,7 @@ export class EngagementService {
         },
         recipientUserId: recipient.id,
         targetPath: `/studies/${study.slug}`,
-        title: "Nova curtida em publicacao",
+        title: "Nova curtida em publicação",
       }))
     );
   }
@@ -141,7 +141,7 @@ export class EngagementService {
         if (replyRecipient.id !== actor.id && replyRecipient.role === "user") {
           notifications.push({
             actorUserId: actor.id,
-            body: `${actor.name} respondeu um comentario seu em "${study.title}".`,
+            body: `${actor.name} respondeu um comentário seu em "${study.title}".`,
             kind: "comment-reply" as const,
             metadata: {
               actorRole: actor.role,
@@ -152,7 +152,7 @@ export class EngagementService {
             },
             recipientUserId: replyRecipient.id,
             targetPath: `/studies/${study.slug}`,
-            title: "Responderam seu comentario",
+            title: "Responderam seu comentário",
           });
         }
       }
@@ -165,7 +165,7 @@ export class EngagementService {
         .filter((recipient) => recipient.role === "user")
         .map((recipient) => ({
           actorUserId: actor.id,
-          body: `${actor.name} comentou na mesma publicacao que voce: "${study.title}".`,
+          body: `${actor.name} comentou na mesma publicação que você: "${study.title}".`,
           kind: "thread-comment" as const,
           metadata: {
             actorRole: actor.role,
@@ -176,7 +176,7 @@ export class EngagementService {
           },
           recipientUserId: recipient.id,
           targetPath: `/studies/${study.slug}`,
-          title: "Nova conversa na publicacao",
+          title: "Nova conversa na publicação",
         }))
     );
 
@@ -186,7 +186,7 @@ export class EngagementService {
       ...adminRecipients.map((recipient) => ({
         actorUserId: actor.id,
         body: parentCommentOwnerId
-          ? `${actor.name} respondeu um comentario em "${study.title}".`
+          ? `${actor.name} respondeu um comentário em "${study.title}".`
           : `${actor.name} comentou em "${study.title}".`,
         kind: parentCommentOwnerId ? ("admin-reply" as const) : ("admin-comment" as const),
         metadata: {
@@ -198,7 +198,7 @@ export class EngagementService {
         },
         recipientUserId: recipient.id,
         targetPath: `/studies/${study.slug}`,
-        title: parentCommentOwnerId ? "Nova resposta em comentario" : "Novo comentario em publicacao",
+        title: parentCommentOwnerId ? "Nova resposta em comentário" : "Novo comentário em publicação",
       }))
     );
 
@@ -230,7 +230,7 @@ export class EngagementService {
     if (directRecipient && directRecipient.id !== actor.id && directRecipient.role === "user") {
       notifications.push({
         actorUserId: actor.id,
-        body: `${actor.name} curtiu um comentario seu em "${study.title}".`,
+        body: `${actor.name} curtiu um comentário seu em "${study.title}".`,
         kind: "comment-like" as const,
         metadata: {
           actorRole: actor.role,
@@ -241,7 +241,7 @@ export class EngagementService {
         },
         recipientUserId: directRecipient.id,
         targetPath: `/studies/${study.slug}`,
-        title: "Curtiram seu comentario",
+        title: "Curtiram seu comentário",
       });
     }
 
@@ -250,7 +250,7 @@ export class EngagementService {
     notifications.push(
       ...adminRecipients.map((recipient) => ({
         actorUserId: actor.id,
-        body: `${actor.name} curtiu um comentario em "${study.title}".`,
+        body: `${actor.name} curtiu um comentário em "${study.title}".`,
         kind: "admin-comment-like" as const,
         metadata: {
           actorRole: actor.role,
@@ -261,7 +261,7 @@ export class EngagementService {
         },
         recipientUserId: recipient.id,
         targetPath: `/studies/${study.slug}`,
-        title: "Nova curtida em comentario",
+        title: "Nova curtida em comentário",
       }))
     );
 

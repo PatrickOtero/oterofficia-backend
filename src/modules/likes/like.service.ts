@@ -20,7 +20,7 @@ export class LikeService {
     const post = await this.studies.findById(postId);
 
     if (!post || post.status !== "published") {
-      throw new AppError("NÃƒÂ£o foi possÃƒÂ­vel curtir este estudo.", 404, "study_not_found");
+      throw new AppError("Não foi possível curtir este estudo.", 404, "study_not_found");
     }
 
     const existingLike = await this.likes.findLike(postId, user.id);
@@ -43,7 +43,7 @@ export class LikeService {
     const post = await this.studies.findById(postId);
 
     if (!post || post.status !== "published") {
-      throw new AppError("NÃƒÂ£o foi possÃƒÂ­vel remover a curtida deste estudo.", 404, "study_not_found");
+      throw new AppError("Não foi possível remover a curtida deste estudo.", 404, "study_not_found");
     }
 
     await this.likes.deleteLike(postId, user.id);

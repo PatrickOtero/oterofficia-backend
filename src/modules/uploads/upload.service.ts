@@ -45,14 +45,14 @@ export class UploadService {
 
     if (providerErrors.length) {
       throw new AppError(
-        "Nao foi possivel remover o arquivo no storage remoto.",
+        "Não foi possível remover o arquivo no storage remoto.",
         503,
         "upload_delete_failed"
       );
     }
 
     if (!localDeleted && !cloudDeleted) {
-      throw new AppError("Arquivo nao encontrado.", 404, "upload_not_found");
+      throw new AppError("Arquivo não encontrado.", 404, "upload_not_found");
     }
   }
 
@@ -70,7 +70,7 @@ export class UploadService {
     } catch (error) {
       console.error("Falha ao ler o arquivo da Cloudflare R2.", this.describeError(error));
       throw new AppError(
-        "Nao foi possivel acessar o arquivo no storage remoto.",
+        "Não foi possível acessar o arquivo no storage remoto.",
         503,
         "upload_read_failed"
       );
@@ -80,7 +80,7 @@ export class UploadService {
       return cloudFile;
     }
 
-    throw new AppError("Arquivo nao encontrado.", 404, "upload_not_found");
+    throw new AppError("Arquivo não encontrado.", 404, "upload_not_found");
   }
 
   public async uploadFile(file: UploadableFile, folder: UploadFolder): Promise<UploadedAsset> {
@@ -103,13 +103,13 @@ export class UploadService {
         };
       } catch (error) {
         console.error(
-          "Falha ao enviar o arquivo para a Cloudflare R2. O fallback local sera utilizado.",
+          "Falha ao enviar o arquivo para a Cloudflare R2. O fallback local será utilizado.",
           this.describeError(error)
         );
 
         if (!allowLocalFallback) {
           throw new AppError(
-            "Nao foi possivel concluir o upload no storage principal.",
+            "Não foi possível concluir o upload no storage principal.",
             503,
             "cloud_upload_failed"
           );

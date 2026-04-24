@@ -34,7 +34,7 @@ export class ProjectService {
     const existingByName = await this.repository.findByName(input.projectName);
 
     if (existingByImage || existingByName) {
-      throw new AppError("Ja existe um projeto com esta imagem ou este nome.", 400, "project_conflict");
+      throw new AppError("Já existe um projeto com esta imagem ou este nome.", 400, "project_conflict");
     }
 
     const project = await this.repository.createProject(input);
@@ -46,19 +46,19 @@ export class ProjectService {
     const project = await this.repository.findById(projectId);
 
     if (!project) {
-      throw new AppError("Projeto nao encontrado.", 404, "project_not_found");
+      throw new AppError("Projeto não encontrado.", 404, "project_not_found");
     }
 
     await this.repository.deleteProject(projectId);
 
-    return { message: "Projeto excluido com sucesso." };
+    return { message: "Projeto excluído com sucesso." };
   }
 
   public async getProject(projectId: number) {
     const project = await this.repository.findById(projectId);
 
     if (!project) {
-      throw new AppError("Projeto nao encontrado.", 404, "project_not_found");
+      throw new AppError("Projeto não encontrado.", 404, "project_not_found");
     }
 
     return mapProject(project);
@@ -74,7 +74,7 @@ export class ProjectService {
     const project = await this.repository.findById(projectId);
 
     if (!project) {
-      throw new AppError("Projeto nao encontrado.", 404, "project_not_found");
+      throw new AppError("Projeto não encontrado.", 404, "project_not_found");
     }
 
     const conflictingProject = await this.repository.findConflictingProject(
@@ -84,7 +84,7 @@ export class ProjectService {
     );
 
     if (conflictingProject) {
-      throw new AppError("Ja existe um projeto com esta imagem ou este nome.", 400, "project_conflict");
+      throw new AppError("Já existe um projeto com esta imagem ou este nome.", 400, "project_conflict");
     }
 
     await this.repository.updateProject(projectId, input);
@@ -92,7 +92,7 @@ export class ProjectService {
     const updatedProject = await this.repository.findById(projectId);
 
     if (!updatedProject) {
-      throw new AppError("Projeto nao encontrado.", 404, "project_not_found");
+      throw new AppError("Projeto não encontrado.", 404, "project_not_found");
     }
 
     return mapProject(updatedProject);

@@ -35,7 +35,7 @@ const readOptionalInternalOrExternalUrl = (value: unknown, label: string) => {
 
 const readObjectArray = (value: unknown, label: string) => {
   if (!Array.isArray(value)) {
-    throw new AppError(`${label} esta invalido.`, 400, "validation_error");
+    throw new AppError(`${label} está inválido.`, 400, "validation_error");
   }
 
   return value.map((item, index) => readObject(item, `${label} ${index + 1}`));
@@ -50,12 +50,12 @@ const parseHeroBlock = (value: unknown) => {
     highlights: readStringArray(data.highlights, "Highlights", { maxItemLength: 80, maxItems: 8 }),
     imageAlt: readOptionalString(data.imageAlt, "Texto alternativo da imagem", { max: 180 }),
     imageUrl: readOptionalUrl(data.imageUrl, "Imagem do hero"),
-    location: readOptionalString(data.location, "Localizacao", { max: 120 }),
+    location: readOptionalString(data.location, "Localização", { max: 120 }),
     primaryCtaLabel: readOptionalString(data.primaryCtaLabel, "Rótulo do CTA principal", { max: 40 }),
     primaryCtaUrl: readOptionalInternalOrExternalUrl(data.primaryCtaUrl, "URL do CTA principal"),
     secondaryCtaLabel: readOptionalString(data.secondaryCtaLabel, "Rótulo do CTA secundário", { max: 40 }),
-    secondaryCtaUrl: readOptionalInternalOrExternalUrl(data.secondaryCtaUrl, "URL do CTA secundario"),
-    subtitle: readOptionalString(data.subtitle, "Subtitulo", { max: 240 }),
+    secondaryCtaUrl: readOptionalInternalOrExternalUrl(data.secondaryCtaUrl, "URL do CTA secundário"),
+    subtitle: readOptionalString(data.subtitle, "Subtítulo", { max: 240 }),
     summary: readOptionalString(data.summary, "Resumo", { max: 4000, preserveWhitespace: true }),
     title: readRequiredString(data.title, "Título do hero", { max: 160 }),
   };
@@ -66,11 +66,11 @@ const parseTextBlock = (value: unknown) => {
   const variant = readOptionalString(data.variant, "Variante", { max: 20 }) || "default";
 
   if (!["default", "spotlight"].includes(variant)) {
-    throw new AppError("Variante do bloco de texto esta invalida.", 400, "validation_error");
+    throw new AppError("Variante do bloco de texto está inválida.", 400, "validation_error");
   }
 
   return {
-    body: readRequiredString(data.body, "Conteudo do texto", {
+    body: readRequiredString(data.body, "Conteúdo do texto", {
       max: 12000,
       preserveWhitespace: true,
     }),
@@ -84,7 +84,7 @@ const parseImageBlock = (value: unknown) => {
   const layout = readOptionalString(data.layout, "Layout da imagem", { max: 20 }) || "wide";
 
   if (!["banner", "portrait", "wide"].includes(layout)) {
-    throw new AppError("Layout da imagem esta invalido.", 400, "validation_error");
+    throw new AppError("Layout da imagem está inválido.", 400, "validation_error");
   }
 
   return {
@@ -120,7 +120,7 @@ const parseSocialBlock = (value: unknown) => {
   const data = readObject(value, "Bloco de redes");
   const items = readObjectArray(data.items, "Itens sociais").map((item) => ({
     handle: readOptionalString(item.handle, "Handle social", { max: 120 }),
-    iconUrl: readOptionalUrl(item.iconUrl, "Icone social"),
+    iconUrl: readOptionalUrl(item.iconUrl, "Ícone social"),
     label: readRequiredString(item.label, "Rótulo social", { max: 80 }),
     url: readRequiredString(readOptionalUrl(item.url, "URL social"), "URL social", { max: 2048 }),
   }));
@@ -139,7 +139,7 @@ const parseContactBlock = (value: unknown) => {
   const data = readObject(value, "Bloco de contato");
   const items = readObjectArray(data.items, "Itens de contato").map((item) => ({
     label: readRequiredString(item.label, "Rótulo de contato", { max: 80 }),
-    note: readOptionalString(item.note, "Observacao de contato", {
+    note: readOptionalString(item.note, "Observação de contato", {
       max: 240,
       preserveWhitespace: true,
     }),
@@ -158,7 +158,7 @@ const parseContactBlock = (value: unknown) => {
 };
 
 const parseContactFormBlock = (value: unknown) => {
-  const data = readObject(value, "Bloco de formulario");
+  const data = readObject(value, "Bloco de formulário");
 
   return {
     description: readOptionalString(data.description, "Descrição do formulário", {
@@ -195,7 +195,7 @@ const parseBlockData = (type: AboutBlockType, value: unknown) => {
     case "contact-form":
       return parseContactFormBlock(value);
     default:
-      throw new AppError("Tipo de bloco invalido.", 400, "validation_error");
+      throw new AppError("Tipo de bloco inválido.", 400, "validation_error");
   }
 };
 
@@ -212,7 +212,7 @@ export const parseAboutPayload = (value: unknown): UpsertAboutPageInput => {
       const type = readRequiredString(currentBlock.type, "Tipo do bloco") as AboutBlockType;
 
       if (!ABOUT_BLOCK_TYPES.includes(type)) {
-        throw new AppError("Tipo de bloco invalido.", 400, "validation_error");
+        throw new AppError("Tipo de bloco inválido.", 400, "validation_error");
       }
 
       const id = readOptionalString(currentBlock.id, "Identificador do bloco", { max: 80 });

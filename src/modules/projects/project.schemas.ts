@@ -14,7 +14,7 @@ export const parseProjectId = (value: unknown) => {
   const projectId = readOptionalPositiveInteger(value, "Identificador do projeto");
 
   if (!projectId) {
-    throw new AppError("Identificador de projeto invalido.", 400, "invalid_project_id");
+    throw new AppError("Identificador de projeto inválido.", 400, "invalid_project_id");
   }
 
   return projectId;
@@ -28,7 +28,7 @@ export const parseProjectPayload = (value: unknown): ProjectInput => {
     frontendUrl: readOptionalUrl(body.frontend_url, "URL do frontend") ?? null,
     imageUrl: readRequiredString(body.image_url, "Imagem do projeto", { max: 2048 }),
     organizationName: readOptionalString(body.organization_name, "Organização", { max: 120 }) ?? null,
-    projectDescription: readRequiredString(body.project_desc, "Descricao do projeto", {
+    projectDescription: readRequiredString(body.project_desc, "Descrição do projeto", {
       max: 4000,
       preserveWhitespace: true,
     }),
@@ -54,6 +54,6 @@ export const parseProjectPayload = (value: unknown): ProjectInput => {
       ["personal", "soujunior"],
       "personal"
     ),
-    videoUrl: readOptionalUrl(body.video_url, "URL do video") ?? null,
+    videoUrl: readOptionalUrl(body.video_url, "URL do vídeo") ?? null,
   };
 };

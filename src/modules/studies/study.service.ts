@@ -17,7 +17,7 @@ const resolveUniqueSlug = async (
   const baseSlug = slugify(incomingSlug || title);
 
   if (!baseSlug) {
-    throw new AppError("NÃƒÂ£o foi possÃƒÂ­vel gerar um slug vÃƒÂ¡lido para esta postagem.", 400, "invalid_slug");
+    throw new AppError("Não foi possível gerar um slug válido para esta postagem.", 400, "invalid_slug");
   }
 
   let candidate = baseSlug;
@@ -86,7 +86,7 @@ export class StudyService {
     const deletedRows = await this.repository.deleteStudy(postId);
 
     if (!deletedRows) {
-      throw new AppError("Estudo nÃƒÂ£o encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo não encontrado.", 404, "study_not_found");
     }
   }
 
@@ -98,7 +98,7 @@ export class StudyService {
     const study = await this.repository.getStudyDetailById(postId, currentUserId);
 
     if (!study) {
-      throw new AppError("Estudo nÃƒÂ£o encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo não encontrado.", 404, "study_not_found");
     }
 
     return study;
@@ -108,7 +108,7 @@ export class StudyService {
     const study = await this.repository.getPublishedStudyDetailBySlug(slug, currentUserId);
 
     if (!study) {
-      throw new AppError("Estudo nÃƒÂ£o encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo não encontrado.", 404, "study_not_found");
     }
 
     if (currentUserId) {
@@ -143,7 +143,7 @@ export class StudyService {
     const existingStudy = await this.repository.getStudyDetailById(postId, currentUserId);
 
     if (!existingStudy) {
-      throw new AppError("Estudo nÃƒÂ£o encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo não encontrado.", 404, "study_not_found");
     }
 
     await this.repository.updateStudy(postId, {
@@ -168,7 +168,7 @@ export class StudyService {
     const existingStudy = await this.repository.getStudyDetailById(postId, currentUserId);
 
     if (!existingStudy) {
-      throw new AppError("Estudo nÃƒÂ£o encontrado.", 404, "study_not_found");
+      throw new AppError("Estudo não encontrado.", 404, "study_not_found");
     }
 
     const slug = await resolveUniqueSlug(this.repository, input.title, input.slug, postId);

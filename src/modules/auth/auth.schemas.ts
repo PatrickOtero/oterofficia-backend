@@ -11,7 +11,7 @@ const parseOptionalBirthDate = (value: unknown) => {
   const parsedDate = new Date(`${normalized}T00:00:00.000Z`);
 
   if (Number.isNaN(parsedDate.getTime())) {
-    throw new AppError("A data de nascimento esta invalida.", 400, "validation_error");
+    throw new AppError("A data de nascimento está inválida.", 400, "validation_error");
   }
 
   return parsedDate;
@@ -53,7 +53,7 @@ export const parseTokenPayload = (payload: unknown) => {
 };
 
 export const parseResetPasswordPayload = (payload: unknown) => {
-  const body = readObject(payload, "Os dados de redefinicao");
+  const body = readObject(payload, "Os dados de redefinição");
 
   return {
     password: readRequiredString(body.password, "A nova senha", { max: 120, min: 8 }),
@@ -89,7 +89,7 @@ export const parseEmailChangePayload = (payload: unknown) => {
 };
 
 export const parseDeletionRequestPayload = (payload: unknown) => {
-  const body = readObject(payload, "Os dados de exclusao");
+  const body = readObject(payload, "Os dados de exclusão");
 
   return {
     password: readRequiredString(body.password, "A senha atual", { max: 120, min: 8 }),

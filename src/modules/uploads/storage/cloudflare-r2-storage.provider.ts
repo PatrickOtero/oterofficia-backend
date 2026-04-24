@@ -29,7 +29,7 @@ export class CloudflareR2StorageProvider implements IStorageProvider {
 
   private getClient() {
     if (!this.isConfigured()) {
-      throw new Error("O storage da Cloudflare R2 nao esta configurado.");
+      throw new Error("O storage da Cloudflare R2 não está configurado.");
     }
 
     if (!this.client) {

@@ -118,11 +118,11 @@ export class NodemailerService implements IMailService {
 
     if (missingVariables.length) {
       throw new AppError(
-        "A configuracao de e-mail do servidor esta incompleta.",
+        "A configuração de e-mail do servidor está incompleta.",
         500,
         "mail_config_invalid",
         this.buildOperationalDetails({
-          hint: "Defina as variaveis SMTP obrigatorias no ambiente do backend.",
+          hint: "Defina as variáveis SMTP obrigatórias no ambiente do backend.",
           missingVariables,
         })
       );
@@ -130,11 +130,11 @@ export class NodemailerService implements IMailService {
 
     if (template && !this.viewPath) {
       throw new AppError(
-        "Os templates de e-mail nao foram encontrados no servidor.",
+        "Os templates de e-mail não foram encontrados no servidor.",
         500,
         "mail_template_missing",
         this.buildOperationalDetails({
-          hint: "Garanta que a pasta de templates de e-mail seja copiada para a imagem de producao.",
+          hint: "Garanta que a pasta de templates de e-mail seja copiada para a imagem de produção.",
           searchedPaths: MAIL_VIEW_PATH_CANDIDATES,
           template,
         })
@@ -168,12 +168,12 @@ export class NodemailerService implements IMailService {
         /Failed to lookup view/i.test(String(error?.message || ""))
       ) {
         throw new AppError(
-          "O template de e-mail configurado nao foi encontrado.",
+          "O template de e-mail configurado não foi encontrado.",
           500,
           "mail_template_missing",
           this.buildOperationalDetails({
             ...buildMailErrorDetails(error),
-            hint: "Confirme se os arquivos .handlebars estao presentes na imagem publicada.",
+            hint: "Confirme se os arquivos .handlebars estão presentes na imagem publicada.",
             searchedPaths: MAIL_VIEW_PATH_CANDIDATES,
             template: options.template || null,
           })
@@ -182,12 +182,12 @@ export class NodemailerService implements IMailService {
 
       if (error?.code === "EAUTH" || error?.responseCode === 535) {
         throw new AppError(
-          "Falha na autenticacao do provedor de e-mail. Revise as credenciais SMTP configuradas.",
+          "Falha na autenticação do provedor de e-mail. Revise as credenciais SMTP configuradas.",
           500,
           "mail_auth_failed",
           this.buildOperationalDetails({
             ...buildMailErrorDetails(error),
-            hint: "Revise host, usuario, senha e a politica SMTP do provedor.",
+            hint: "Revise host, usuário, senha e a política SMTP do provedor.",
           })
         );
       }
@@ -199,7 +199,7 @@ export class NodemailerService implements IMailService {
         error?.code === "EDNS"
       ) {
         throw new AppError(
-          "Nao foi possivel conectar ao provedor de e-mail configurado.",
+          "Não foi possível conectar ao provedor de e-mail configurado.",
           500,
           "mail_connection_failed",
           this.buildOperationalDetails({
@@ -210,7 +210,7 @@ export class NodemailerService implements IMailService {
       }
 
       throw new AppError(
-        "Nao foi possivel enviar o e-mail no momento.",
+        "Não foi possível enviar o e-mail no momento.",
         500,
         "mail_send_failed",
         this.buildOperationalDetails({
