@@ -1,4 +1,4 @@
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import { AppError } from "../../core/errors/AppError";
 import { TOKENS } from "../../shared/container/tokens";
 import { ProjectEntity } from "../../shared/infra/database/entities/ProjectEntity";
@@ -22,7 +22,7 @@ const mapProject = (project: ProjectEntity): ProjectResponse => ({
   video_url: project.videoUrl,
 });
 
-@injectable()
+@singleton()
 export class ProjectService {
   constructor(
     @inject(TOKENS.ProjectRepository)

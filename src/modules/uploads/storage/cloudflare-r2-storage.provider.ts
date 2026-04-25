@@ -6,13 +6,13 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { StoredFile, UploadableFile } from "../upload.types";
 import { getStorageConfig } from "./storage.config";
 import { IStorageProvider } from "./storage.provider.interface";
 import { guessMimeTypeFromKey } from "./storage.utils";
 
-@injectable()
+@singleton()
 export class CloudflareR2StorageProvider implements IStorageProvider {
   private readonly config = getStorageConfig().cloudflare;
 

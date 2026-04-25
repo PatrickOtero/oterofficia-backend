@@ -1,10 +1,10 @@
 import { randomUUID } from "crypto";
 import { getDataSource } from "../../shared/infra/database/data-source";
 import { StudyPostLikeEntity } from "../../shared/infra/database/entities/StudyPostLikeEntity";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { ILikeRepository, LikeRecord } from "./like.repository.interface";
 
-@injectable()
+@singleton()
 export class LikeRepository implements ILikeRepository {
   public async createLike(postId: string, userId: string) {
     const dataSource = await getDataSource();

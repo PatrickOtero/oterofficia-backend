@@ -1,4 +1,4 @@
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import { TOKENS } from "../../shared/container/tokens";
 import { IAboutRepository } from "../about/about.repository.interface";
 import { IEngagementRepository } from "../engagement/engagement.repository.interface";
@@ -140,7 +140,7 @@ const normalizeReadingContext = (
   };
 };
 
-@injectable()
+@singleton()
 export class RobotAssistantDataService {
   constructor(
     @inject(TOKENS.EngagementRepository)

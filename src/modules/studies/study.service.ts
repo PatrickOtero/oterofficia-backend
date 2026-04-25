@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import { AppError } from "../../core/errors/AppError";
 import { slugify } from "../../core/utils/slug";
 import { TOKENS } from "../../shared/container/tokens";
@@ -51,7 +51,7 @@ const resolveReadingTime = (input: UpsertStudyInput) =>
     title: input.title,
   });
 
-@injectable()
+@singleton()
 export class StudyService {
   constructor(
     @inject(TOKENS.StudyRepository)

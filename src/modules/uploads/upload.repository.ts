@@ -1,11 +1,11 @@
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import { TOKENS } from "../../shared/container/tokens";
 import { CloudflareR2StorageProvider } from "./storage/cloudflare-r2-storage.provider";
 import { IStorageProvider } from "./storage/storage.provider.interface";
 import { IUploadRepository } from "./upload.repository.interface";
 import { StoredFile, UploadableFile } from "./upload.types";
 
-@injectable()
+@singleton()
 export class UploadRepository implements IUploadRepository {
   constructor(
     @inject(TOKENS.LocalStorageProvider)

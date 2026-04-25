@@ -1,4 +1,4 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { getDataSource } from "../../shared/infra/database/data-source";
 import type {
   IRobotAssistantRepository,
@@ -28,7 +28,7 @@ const normalizeRoutePathSql = (fieldName: string) => `
   end
 `;
 
-@injectable()
+@singleton()
 export class RobotAssistantRepository implements IRobotAssistantRepository {
   public async getAuthFriction(since: Date): Promise<RobotAssistantAuthFrictionRow[]> {
     const dataSource = await getDataSource();

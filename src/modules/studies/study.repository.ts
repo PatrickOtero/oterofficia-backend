@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { getDataSource } from "../../shared/infra/database/data-source";
 import { StudyPostBlockEntity } from "../../shared/infra/database/entities/StudyPostBlockEntity";
 import { StudyPostEntity } from "../../shared/infra/database/entities/StudyPostEntity";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { normalizeUploadPayload, normalizeUploadUrl } from "../uploads/upload-url";
 import {
   AdminStudyFilters,
@@ -182,7 +182,7 @@ const buildBlocksInsert = (postId: string, blocks: StudyInputBlock[]) => {
   }));
 };
 
-@injectable()
+@singleton()
 export class StudyRepository implements IStudyRepository {
   public async countCommentsByPostId(postId: string) {
     const dataSource = await getDataSource();

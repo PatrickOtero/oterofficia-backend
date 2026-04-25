@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import {
   buildActionTokenExpiry,
   createActionToken,
@@ -44,7 +44,7 @@ type UploadAvatarInput = {
   size: number;
 };
 
-@injectable()
+@singleton()
 export class AuthService {
   constructor(
     @inject(TOKENS.AuthRepository)

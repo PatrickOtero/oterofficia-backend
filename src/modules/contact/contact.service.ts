@@ -1,4 +1,4 @@
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import { TOKENS } from "../../shared/container/tokens";
 import { IMailService } from "../../services/mail.service.interface";
 
@@ -9,7 +9,7 @@ type ContactEmailInput = {
   subject: string;
 };
 
-@injectable()
+@singleton()
 export class ContactService {
   constructor(
     @inject(TOKENS.MailService)

@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { getDataSource } from "../../shared/infra/database/data-source";
 import { InteractionEventEntity } from "../../shared/infra/database/entities/InteractionEventEntity";
 import { NotificationEntity } from "../../shared/infra/database/entities/NotificationEntity";
@@ -116,7 +116,7 @@ const interactionMixLabelMap: Record<EngagementInteractionKind, string> = {
   study_view: "Leituras",
 };
 
-@injectable()
+@singleton()
 export class EngagementRepository implements IEngagementRepository {
   public async createInteractionEvent(input: CreateInteractionEventInput) {
     const dataSource = await getDataSource();

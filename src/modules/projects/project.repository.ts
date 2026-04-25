@@ -1,10 +1,10 @@
 import { getDataSource } from "../../shared/infra/database/data-source";
 import { ProjectEntity } from "../../shared/infra/database/entities/ProjectEntity";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { IProjectRepository } from "./project.repository.interface";
 import { ProjectInput } from "./project.types";
 
-@injectable()
+@singleton()
 export class ProjectRepository implements IProjectRepository {
   private async syncPrimaryKeySequence() {
     const dataSource = await getDataSource();

@@ -1,4 +1,4 @@
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import { TOKENS } from "../../shared/container/tokens";
 import { normalizeUploadPayload } from "../uploads/upload-url";
 import { IAboutRepository } from "./about.repository.interface";
@@ -12,7 +12,7 @@ const normalizeBlocks = (blocks: AboutInputBlock[]) =>
     type: block.type,
   }));
 
-@injectable()
+@singleton()
 export class AboutService {
   constructor(
     @inject(TOKENS.AboutRepository)

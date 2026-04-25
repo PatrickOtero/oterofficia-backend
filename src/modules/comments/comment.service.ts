@@ -1,4 +1,4 @@
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import { AppError } from "../../core/errors/AppError";
 import { TOKENS } from "../../shared/container/tokens";
 import { AuthenticatedSessionUser } from "../auth/auth.types";
@@ -7,7 +7,7 @@ import { IStudyRepository } from "../studies/study.repository.interface";
 import { AdminCommentFilters, CommentLikeResponse } from "./comment.types";
 import { ICommentRepository } from "./comment.repository.interface";
 
-@injectable()
+@singleton()
 export class CommentService {
   constructor(
     @inject(TOKENS.CommentRepository)

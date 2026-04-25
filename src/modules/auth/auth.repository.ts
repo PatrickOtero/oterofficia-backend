@@ -1,4 +1,4 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { getDataSource } from "../../shared/infra/database/data-source";
 import { UserActionTokenEntity } from "../../shared/infra/database/entities/UserActionTokenEntity";
 import { UserSessionEntity } from "../../shared/infra/database/entities/UserSessionEntity";
@@ -75,7 +75,7 @@ const mapActionTokenEntity = (token: UserActionTokenEntity): UserActionTokenReco
   userId: token.userId,
 });
 
-@injectable()
+@singleton()
 export class AuthRepository implements IAuthRepository {
   public async createActionToken(input: CreateUserActionTokenInput) {
     const dataSource = await getDataSource();

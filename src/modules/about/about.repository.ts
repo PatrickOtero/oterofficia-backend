@@ -1,4 +1,4 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { getDataSource } from "../../shared/infra/database/data-source";
 import { AboutPageEntity } from "../../shared/infra/database/entities/AboutPageEntity";
 import { normalizeUploadPayload } from "../uploads/upload-url";
@@ -29,7 +29,7 @@ const mapPage = (entity: AboutPageEntity): AboutPage => ({
   updatedAt: toIso(entity.updatedAt),
 });
 
-@injectable()
+@singleton()
 export class AboutRepository implements IAboutRepository {
   public async getPage() {
     const dataSource = await getDataSource();

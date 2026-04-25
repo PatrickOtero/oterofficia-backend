@@ -1,11 +1,11 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { AuthenticatedSessionUser } from "../auth/auth.types";
 import { RobotAdminAssistantService } from "./robot-admin-assistant.service";
 import { RobotAssistantDataService } from "./robot-assistant.data.service";
 import { RobotAssistantRequest } from "./robot-assistant.types";
 import { RobotUserAssistantService } from "./robot-user-assistant.service";
 
-@injectable()
+@singleton()
 export class RobotAssistantService {
   constructor(
     private readonly dataService: RobotAssistantDataService,

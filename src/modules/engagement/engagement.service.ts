@@ -1,4 +1,4 @@
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import { AppError } from "../../core/errors/AppError";
 import { TOKENS } from "../../shared/container/tokens";
 import { AuthenticatedSessionUser } from "../auth/auth.types";
@@ -6,7 +6,7 @@ import { StudyComment } from "../comments/comment.types";
 import { StudyReference } from "../studies/study.repository.interface";
 import { IEngagementRepository } from "./engagement.repository.interface";
 
-@injectable()
+@singleton()
 export class EngagementService {
   constructor(
     @inject(TOKENS.EngagementRepository)

@@ -1,12 +1,12 @@
 import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import { dirname, resolve } from "path";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { StoredFile, UploadableFile } from "../upload.types";
 import { getStorageConfig } from "./storage.config";
 import { IStorageProvider } from "./storage.provider.interface";
 import { guessMimeTypeFromKey } from "./storage.utils";
 
-@injectable()
+@singleton()
 export class LocalStorageProvider implements IStorageProvider {
   private readonly uploadsRoot = getStorageConfig().localUploadsRoot;
 

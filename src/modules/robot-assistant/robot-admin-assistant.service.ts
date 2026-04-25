@@ -1,4 +1,4 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import {
   RobotAssistantAction,
   RobotAssistantAdminSnapshot,
@@ -107,7 +107,7 @@ const detectAdminIntent = (prompt: string) => {
   return "admin-overview";
 };
 
-@injectable()
+@singleton()
 export class RobotAdminAssistantService {
   public buildResponse(input: {
     prompt?: string | null;

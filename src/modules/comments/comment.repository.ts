@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { getDataSource } from "../../shared/infra/database/data-source";
 import { StudyCommentLikeEntity } from "../../shared/infra/database/entities/StudyCommentLikeEntity";
 import { StudyPostCommentEntity } from "../../shared/infra/database/entities/StudyPostCommentEntity";
@@ -105,7 +105,7 @@ const buildCommentQuery = (whereClause: string) => `
   order by comments.created_at asc
 `;
 
-@injectable()
+@singleton()
 export class CommentRepository implements ICommentRepository {
   public async createComment(input: CreateCommentInput, viewerUserId?: string, viewerRole?: "admin" | "user") {
     const dataSource = await getDataSource();

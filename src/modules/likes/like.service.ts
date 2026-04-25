@@ -1,4 +1,4 @@
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import { AppError } from "../../core/errors/AppError";
 import { TOKENS } from "../../shared/container/tokens";
 import { AuthenticatedSessionUser } from "../auth/auth.types";
@@ -6,7 +6,7 @@ import { EngagementService } from "../engagement/engagement.service";
 import { IStudyRepository } from "../studies/study.repository.interface";
 import { ILikeRepository } from "./like.repository.interface";
 
-@injectable()
+@singleton()
 export class LikeService {
   constructor(
     @inject(TOKENS.LikeRepository)

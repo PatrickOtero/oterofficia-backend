@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import nodemailer from "nodemailer";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { AppError } from "../core/errors/AppError";
 import { IMailService, MailTemplateOptions } from "./mail.service.interface";
 
@@ -62,7 +62,7 @@ const buildMailErrorDetails = (error: any) => ({
   responseCode: error?.responseCode || null,
 });
 
-@injectable()
+@singleton()
 export class NodemailerService implements IMailService {
   private readonly viewPath: string | null;
   private readonly port: number;

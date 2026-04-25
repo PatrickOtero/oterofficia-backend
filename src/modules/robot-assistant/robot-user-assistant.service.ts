@@ -1,4 +1,4 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { AboutBlock } from "../about/about.types";
 import {
   RobotAssistantAction,
@@ -142,7 +142,7 @@ const detectUserIntent = (prompt: string) => {
   return "user-overview";
 };
 
-@injectable()
+@singleton()
 export class RobotUserAssistantService {
   public buildResponse(input: {
     prompt?: string | null;

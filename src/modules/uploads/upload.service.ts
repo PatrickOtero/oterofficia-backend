@@ -1,4 +1,4 @@
-import { inject, injectable } from "tsyringe";
+import { inject, singleton } from "tsyringe";
 import { AppError } from "../../core/errors/AppError";
 import { TOKENS } from "../../shared/container/tokens";
 import { getStorageConfig } from "./storage/storage.config";
@@ -6,7 +6,7 @@ import { createUploadKey } from "./storage/storage.utils";
 import { IUploadRepository } from "./upload.repository.interface";
 import { StoredFile, UploadFolder, UploadableFile, UploadedAsset } from "./upload.types";
 
-@injectable()
+@singleton()
 export class UploadService {
   private describeError(error: unknown) {
     if (error instanceof Error) {
