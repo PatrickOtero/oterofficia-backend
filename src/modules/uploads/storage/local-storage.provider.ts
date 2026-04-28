@@ -1,6 +1,7 @@
 import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import { dirname, resolve } from "path";
 import { singleton } from "tsyringe";
+import { hasErrorCode } from "../../../core/utils/error";
 import { StoredFile, UploadableFile } from "../upload.types";
 import { getStorageConfig } from "./storage.config";
 import { IStorageProvider } from "./storage.provider.interface";
@@ -27,8 +28,8 @@ export class LocalStorageProvider implements IStorageProvider {
     try {
       await rm(storagePath, { force: false });
       return true;
-    } catch (error: any) {
-      if (error?.code === "ENOENT") {
+    } catch (error) {
+      if (hasErrorCode(error, "ENOENT")) {
         return false;
       }
 
@@ -47,8 +48,8 @@ export class LocalStorageProvider implements IStorageProvider {
         contentLength: buffer.byteLength,
         mimeType: guessMimeTypeFromKey(key),
       };
-    } catch (error: any) {
-      if (error?.code === "ENOENT") {
+    } catch (error) {
+      if (hasErrorCode(error, "ENOENT")) {
         return null;
       }
 

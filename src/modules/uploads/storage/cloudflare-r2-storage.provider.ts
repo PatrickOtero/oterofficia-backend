@@ -7,6 +7,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 import { singleton } from "tsyringe";
+import { toErrorLike } from "../../../core/utils/error";
 import { StoredFile, UploadableFile } from "../upload.types";
 import { getStorageConfig } from "./storage.config";
 import { IStorageProvider } from "./storage.provider.interface";
@@ -134,11 +135,13 @@ export class CloudflareR2StorageProvider implements IStorageProvider {
         contentLength: response.ContentLength ? Number(response.ContentLength) : buffer.byteLength,
         mimeType: response.ContentType ?? guessMimeTypeFromKey(key),
       };
-    } catch (error: any) {
+    } catch (error) {
+      const errorLike = toErrorLike(error);
+
       if (
         error instanceof NoSuchKey ||
-        error?.name === "NoSuchKey" ||
-        error?.$metadata?.httpStatusCode === 404
+        errorLike.name === "NoSuchKey" ||
+        errorLike.$metadata?.httpStatusCode === 404
       ) {
         return null;
       }

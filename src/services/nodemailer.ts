@@ -3,6 +3,7 @@ import path from "path";
 import nodemailer from "nodemailer";
 import { singleton } from "tsyringe";
 import { AppError } from "../core/errors/AppError";
+import { getErrorMessage, getErrorResponseCode, hasErrorCode, toErrorLike } from "../core/utils/error";
 import { IMailService, MailTemplateOptions } from "./mail.service.interface";
 
 const handlebars = require("nodemailer-express-handlebars");
@@ -55,12 +56,16 @@ const resolveMailViewPath = () =>
 const readMissingMailEnvVars = () =>
   REQUIRED_MAIL_ENV_VARS.filter((envName) => !process.env[envName]?.trim());
 
-const buildMailErrorDetails = (error: any) => ({
-  providerCode: error?.code || null,
-  providerMessage: typeof error?.response === "string" ? error.response : null,
-  reason: error?.message || null,
-  responseCode: error?.responseCode || null,
-});
+const buildMailErrorDetails = (error: unknown) => {
+  const errorLike = toErrorLike(error);
+
+  return {
+    providerCode: typeof errorLike.code === "string" ? errorLike.code : null,
+    providerMessage: typeof errorLike.response === "string" ? errorLike.response : null,
+    reason: getErrorMessage(error) || null,
+    responseCode: getErrorResponseCode(error),
+  };
+};
 
 @singleton()
 export class NodemailerService implements IMailService {
@@ -142,7 +147,7 @@ export class NodemailerService implements IMailService {
     }
   }
 
-  private logMailFailure(error: any, options: MailTemplateOptions) {
+  private logMailFailure(error: unknown, options: MailTemplateOptions) {
     console.error("Mail delivery failed", {
       ...this.buildOperationalDetails({
         template: options.template || null,
@@ -160,12 +165,12 @@ export class NodemailerService implements IMailService {
         ...options,
         from: options.from || resolveSenderAddress(),
       });
-    } catch (error: any) {
+    } catch (error) {
       this.logMailFailure(error, options);
 
       if (
-        error?.code === "ENOENT" ||
-        /Failed to lookup view/i.test(String(error?.message || ""))
+        hasErrorCode(error, "ENOENT") ||
+        /Failed to lookup view/i.test(getErrorMessage(error))
       ) {
         throw new AppError(
           "O template de e-mail configurado não foi encontrado.",
@@ -180,7 +185,7 @@ export class NodemailerService implements IMailService {
         );
       }
 
-      if (error?.code === "EAUTH" || error?.responseCode === 535) {
+      if (hasErrorCode(error, "EAUTH") || getErrorResponseCode(error) === 535) {
         throw new AppError(
           "Falha na autenticação do provedor de e-mail. Revise as credenciais SMTP configuradas.",
           500,
@@ -193,10 +198,10 @@ export class NodemailerService implements IMailService {
       }
 
       if (
-        error?.code === "ECONNECTION" ||
-        error?.code === "ESOCKET" ||
-        error?.code === "ETIMEDOUT" ||
-        error?.code === "EDNS"
+        hasErrorCode(error, "ECONNECTION") ||
+        hasErrorCode(error, "ESOCKET") ||
+        hasErrorCode(error, "ETIMEDOUT") ||
+        hasErrorCode(error, "EDNS")
       ) {
         throw new AppError(
           "Não foi possível conectar ao provedor de e-mail configurado.",

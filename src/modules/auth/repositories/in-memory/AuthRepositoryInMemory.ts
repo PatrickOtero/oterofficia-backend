@@ -5,27 +5,15 @@ import {
   IAuthRepository,
   UpdateUserInput,
 } from "../../auth.repository.interface";
+import { toUserProfile } from "../../auth.mappers";
 import {
   AuthenticatedSessionUser,
   SessionRecord,
   UserActionTokenRecord,
-  UserProfile,
   UserRecord,
 } from "../../auth.types";
 
 const toIso = (value: Date) => value.toISOString();
-
-const toProfile = (user: UserRecord): UserProfile => ({
-  avatarUrl: user.avatarUrl,
-  birthDate: user.birthDate,
-  createdAt: user.createdAt,
-  email: user.email,
-  emailVerifiedAt: user.emailVerifiedAt,
-  id: user.id,
-  name: user.name,
-  role: user.role,
-  updatedAt: user.updatedAt,
-});
 
 export class AuthRepositoryInMemory implements IAuthRepository {
   public sessions: SessionRecord[] = [];
@@ -133,7 +121,7 @@ export class AuthRepositoryInMemory implements IAuthRepository {
 
   public async getUserProfileById(userId: string) {
     const user = await this.findUserById(userId);
-    return user ? toProfile(user) : null;
+    return user ? toUserProfile(user) : null;
   }
 
   public async markActionTokenConsumed(tokenId: string) {

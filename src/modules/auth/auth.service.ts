@@ -12,30 +12,12 @@ import { AppError } from "../../core/errors/AppError";
 import { TOKENS } from "../../shared/container/tokens";
 import { IMailService } from "../../services/mail.service.interface";
 import { UploadService } from "../uploads/upload.service";
+import { extractUploadKeyFromUrl } from "../uploads/upload-key";
 import { buildPublicUploadUrl } from "../uploads/upload-url";
+import { isConfiguredAdminEmail, resolveAuthSenderAddress, resolveAuthSiteUrl } from "./auth.environment";
+import { toUserProfile } from "./auth.mappers";
 import { IAuthRepository } from "./auth.repository.interface";
-import { AuthPayload, RegisterResponse, UserProfile, UserRecord } from "./auth.types";
-
-const shouldBeAdmin = (email: string) =>
-  email.toLowerCase() === process.env.ADMIN_EMAIL?.trim().toLowerCase();
-
-const resolveSiteUrl = () =>
-  (process.env.FRONTEND_APP_URL || process.env.PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
-
-const resolveSenderAddress = () =>
-  process.env.NODEMAILER_FROM || process.env.NODEMAILER_USER || "no-reply@oterofficia.local";
-
-const toUserProfile = (user: UserRecord): UserProfile => ({
-  avatarUrl: user.avatarUrl,
-  birthDate: user.birthDate,
-  createdAt: user.createdAt,
-  email: user.email,
-  emailVerifiedAt: user.emailVerifiedAt,
-  id: user.id,
-  name: user.name,
-  role: user.role,
-  updatedAt: user.updatedAt,
-});
+import { AuthPayload, RegisterResponse } from "./auth.types";
 
 type UploadAvatarInput = {
   buffer: Buffer;
@@ -98,7 +80,8 @@ export class AuthService {
     title: string;
     to: string;
   }) {
-    const appUrl = resolveSiteUrl();
+    const appUrl = resolveAuthSiteUrl();
+    const senderAddress = resolveAuthSenderAddress();
 
     await this.mailer.sendMail({
       context: {
@@ -108,25 +91,12 @@ export class AuthService {
         outro: "Se você não solicitou esta operação, ignore este e-mail.",
         title: input.title,
       },
-      from: resolveSenderAddress(),
-      replyTo: resolveSenderAddress(),
+      from: senderAddress,
+      replyTo: senderAddress,
       subject: input.subject,
       template: "authAction",
       to: input.to,
     });
-  }
-
-  private extractUploadKeyFromUrl(fileUrl?: string | null) {
-    if (!fileUrl) {
-      return null;
-    }
-
-    try {
-      const parsedUrl = new URL(fileUrl);
-      return parsedUrl.pathname.replace(/^\/uploads\//, "");
-    } catch (_error) {
-      return null;
-    }
   }
 
   public async ensureAdminAccount() {
@@ -195,7 +165,7 @@ export class AuthService {
       );
     }
 
-    if (shouldBeAdmin(user.email) && user.role !== "admin") {
+    if (isConfiguredAdminEmail(user.email) && user.role !== "admin") {
       await this.repository.updateUserRole(user.id, "admin");
       user = (await this.repository.findUserById(user.id)) ?? {
         ...user,
@@ -231,11 +201,11 @@ export class AuthService {
 
     const createdUser = await this.repository.createUser({
       email: input.email,
-      emailVerifiedAt: shouldBeAdmin(input.email) ? new Date() : null,
+      emailVerifiedAt: isConfiguredAdminEmail(input.email) ? new Date() : null,
       id: randomUUID(),
       name: input.name,
       passwordHash: hashPassword(input.password),
-      role: shouldBeAdmin(input.email) ? "admin" : "user",
+      role: isConfiguredAdminEmail(input.email) ? "admin" : "user",
     });
 
     if (!createdUser) {
@@ -385,7 +355,7 @@ export class AuthService {
     const uploadedAvatar = await this.uploadService.uploadFile(file, "avatars");
 
     if (user.avatarUrl) {
-      const previousKey = this.extractUploadKeyFromUrl(user.avatarUrl);
+      const previousKey = extractUploadKeyFromUrl(user.avatarUrl);
 
       if (previousKey) {
         await this.uploadService.deleteFile(previousKey).catch(() => undefined);
